@@ -1,0 +1,129 @@
+<?php
+/**
+ * Search tracker.
+ *
+ * @package SearchAnalyticsInsights
+ */
+
+namespace SearchAnalyticsInsights\Tracking;
+
+use SearchAnalyticsInsights\Core\Constants;
+use SearchAnalyticsInsights\Database\Repository\SearchRepository;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Captures WordPress search requests and stores analytics events.
+ */
+final class Tracker {
+	private const COOKIE_NAME     = 'search_analytics_insights_session';
+	private const COOKIE_LIFETIME = MONTH_IN_SECONDS;
+
+	private SearchRepository $repository;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param SearchRepository $repository Search repository instance.
+	 */
+	public function __construct( SearchRepository $repository ) {
+		$this->repository = $repository;
+	}
+
+	/**
+	 * Register hooks.
+	 *
+	 * @return void
+	 */
+	public function register_hooks(): void {
+		add_action( 'init', array( $this, 'maybe_issue_session_cookie' ) );
+		add_action( 'wp', array( $this, 'track_search' ) );
+	}
+
+	/**
+	 * Issue an anonymous session cookie if one does not exist.
+	 *
+	 * @return void
+	 */
+	public function maybe_issue_session_cookie(): void {
+		if ( is_admin() || wp_doing_ajax() || wp_is_json_request() ) {
+			return;
+		}
+
+		if ( ! empty( $_COOKIE[ self::COOKIE_NAME ] ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			return;
+		}
+
+		$session_id = $this->generate_session_id();
+
+		if ( headers_sent() ) {
+			return;
+		}
+
+		setcookie(
+			self::COOKIE_NAME,
+			$session_id,
+			array(
+				'expires'  => time() + self::COOKIE_LIFETIME,
+				'path'     => COOKIEPATH ? COOKIEPATH : '/',
+				'domain'   => COOKIE_DOMAIN,
+				'secure'   => is_ssl(),
+				'httponly' => true,
+				'samesite' => 'Lax',
+			)
+		);
+
+		$_COOKIE[ self::COOKIE_NAME ] = $session_id; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+	}
+
+	/**
+	 * Track the current WordPress search request.
+	 *
+	 * @return void
+	 */
+	public function track_search(): void {
+		if ( is_admin() || ! is_search() || is_feed() ) {
+			return;
+		}
+
+		$search_term = get_search_query( false );
+
+		if ( '' === trim( $search_term ) ) {
+			return;
+		}
+
+		$this->repository->insert(
+			array(
+				'search_term'  => sanitize_text_field( $search_term ),
+				'source'       => Constants::SOURCE_WORDPRESS_SEARCH,
+				'searched_at'  => current_time( 'mysql', true ),
+				'result_count' => isset( $GLOBALS['wp_query']->found_posts ) ? absint( $GLOBALS['wp_query']->found_posts ) : 0,
+				'user_id'      => get_current_user_id() ? absint( get_current_user_id() ) : null,
+				'session_id'   => $this->get_session_id(),
+				'blog_id'      => get_current_blog_id(),
+			)
+		);
+	}
+
+	/**
+	 * Get the anonymous session id.
+	 *
+	 * @return string|null
+	 */
+	private function get_session_id(): ?string {
+		if ( empty( $_COOKIE[ self::COOKIE_NAME ] ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			return null;
+		}
+
+		return sanitize_text_field( wp_unslash( (string) $_COOKIE[ self::COOKIE_NAME ] ) );
+	}
+
+	/**
+	 * Generate a new anonymous session id.
+	 *
+	 * @return string
+	 */
+	private function generate_session_id(): string {
+		return hash( 'sha256', wp_generate_uuid4() . wp_rand() . microtime( true ) );
+	}
+}

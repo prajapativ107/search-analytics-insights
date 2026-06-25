@@ -1,0 +1,29 @@
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Composer
+/vendor/
+
+# Node
+/node_modules/
+
+# Build
+/dist/
+/build/
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.*
+
+# PHPUnit
+.phpunit.result.cache
+
+# Coverage
+coverage/

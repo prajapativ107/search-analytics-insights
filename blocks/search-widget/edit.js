@@ -1,0 +1,103 @@
+/* global wp */
+( function () {
+	'use strict';
+
+	var el                = wp.element.createElement;
+	var Fragment          = wp.element.Fragment;
+	var blockEditor       = wp.blockEditor || wp.editor;
+	var InspectorControls = blockEditor.InspectorControls;
+	var useBlockProps     = blockEditor.useBlockProps;
+	var PanelBody         = wp.components.PanelBody;
+	var ToggleControl     = wp.components.ToggleControl;
+	var SelectControl     = wp.components.SelectControl;
+	var __                = wp.i18n.__;
+
+	var iconMarkup = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M10.5 4a6.5 6.5 0 1 0 4.02 11.62l4.43 4.43 1.41-1.41-4.43-4.43A6.5 6.5 0 0 0 10.5 4Zm0 2a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Z"/></svg>';
+
+	function Edit( props ) {
+		var attributes    = props.attributes;
+		var setAttributes = props.setAttributes;
+		var blockProps    = useBlockProps(
+			{
+				className: 'search-analytics-insights-search-widget search-analytics-insights-search-widget--editor',
+			}
+		);
+
+		var controls = el(
+			InspectorControls,
+			null,
+			el(
+				PanelBody,
+				{ title: __( 'Search Settings', 'search-analytics-insights' ) },
+				el(
+					SelectControl,
+					{
+						label: __( 'Open Mode', 'search-analytics-insights' ),
+						value: attributes.openMode,
+						options: [
+						{ label: __( 'Dropdown', 'search-analytics-insights' ), value: 'dropdown' },
+						{ label: __( 'Modal', 'search-analytics-insights' ), value: 'modal' },
+						{ label: __( 'Slide Down', 'search-analytics-insights' ), value: 'slide-down' },
+						],
+						onChange: function ( value ) {
+							setAttributes( { openMode: value } );
+						},
+					}
+				),
+				el(
+					ToggleControl,
+					{
+						label: __( 'Show Label', 'search-analytics-insights' ),
+						checked: attributes.showLabel,
+						onChange: function ( value ) {
+							setAttributes( { showLabel: value } );
+						},
+					}
+				)
+			)
+		);
+
+		var preview = el(
+			'div',
+			blockProps,
+			el(
+				'button',
+				{ type: 'button', className: 'search-analytics-insights-search-toggle', 'aria-expanded': 'true' },
+				el(
+					'span',
+					{
+						className: 'search-analytics-insights-search-toggle-icon',
+						'aria-hidden': 'true',
+						dangerouslySetInnerHTML: { __html: iconMarkup },
+					}
+				),
+				attributes.showLabel ? el( 'span', { className : 'search-analytics-insights-search-toggle-label' }, __( 'Search', 'search-analytics-insights' ) ) : null
+			),
+			el(
+				'div',
+				{ className: 'search-analytics-insights-search-popup' },
+				el(
+					'div',
+					{ className: 'search-analytics-insights-search-panel' },
+					el(
+						'div',
+						{ className: 'search-analytics-insights-search-preview' },
+						__( 'Search Analytics Search Form Preview', 'search-analytics-insights' )
+					)
+				)
+			)
+		);
+
+		return el( Fragment, null, controls, preview );
+	}
+
+	wp.blocks.registerBlockType(
+		'search-analytics-insights/search-widget',
+		{
+			edit: Edit,
+			save: function () {
+				return null;
+			},
+		}
+	);
+}() );

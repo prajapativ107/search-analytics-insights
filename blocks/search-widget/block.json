@@ -1,0 +1,34 @@
+{
+	"apiVersion": 3,
+	"name": "search-analytics-insights/search-widget",
+	"title": "Search Analytics Search",
+	"category": "widgets",
+	"icon": "search",
+	"description": "Display a search icon that opens the Search Analytics search form.",
+	"textdomain": "search-analytics-insights",
+	"attributes": {
+		"openMode": {
+			"type": "string",
+			"default": "dropdown"
+		},
+		"showLabel": {
+			"type": "boolean",
+			"default": true
+		},
+		"enableAjaxSearch": {
+			"type": "boolean",
+			"default": true
+		},
+		"showFeaturedImages": {
+			"type": "boolean",
+			"default": true
+		}
+	},
+	"supports": {
+		"html": false,
+		"align": ["wide", "full"]
+	},
+	"editorScript": "file:./edit.js",
+	"style": "file:../../assets/css/block-search-widget.css",
+	"render": "file:./render.php"
+}
