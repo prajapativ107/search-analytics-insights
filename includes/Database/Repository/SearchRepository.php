@@ -103,7 +103,7 @@ final class SearchRepository {
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$grouped_sql = "SELECT search_term, user_id, COUNT(*) AS search_count, MAX(searched_at) AS last_searched, MAX(id) AS latest_id FROM {$table} {$where['clause']} GROUP BY search_term, user_id";
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$list_sql    = "SELECT grouped.search_term, grouped.user_id, grouped.search_count, grouped.last_searched, latest.result_count, latest.page_title, latest.page_url, latest.referrer, latest.page_type FROM ( {$grouped_sql} ) AS grouped INNER JOIN {$table} AS latest ON latest.id = grouped.latest_id ORDER BY grouped.last_searched DESC, grouped.search_term ASC, grouped.user_id ASC LIMIT %d OFFSET %d";
+		$list_sql    = "SELECT grouped.search_term, grouped.search_count, grouped.last_searched, latest.result_count, latest.page_title, latest.page_url, latest.referrer, latest.page_type, u.display_name, u.user_login FROM ( {$grouped_sql} ) AS grouped INNER JOIN {$table} AS latest ON latest.id = grouped.latest_id LEFT JOIN {$wpdb->users} AS u ON latest.user_id = u.ID ORDER BY grouped.last_searched DESC, grouped.search_term ASC, u.display_name ASC, u.user_login ASC LIMIT %d OFFSET %d";
 
 		$params   = $where['params'];
 		$params[] = $per_page;
@@ -143,7 +143,7 @@ final class SearchRepository {
 		$where = $this->build_where_clause( $filters );
 		$table = esc_sql( Constants::table_name() );
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$sql   = "SELECT id, search_term, searched_at, source, matched_post_types, result_count, user_id, session_id, page_title, page_url, referrer, page_type FROM {$table} {$where['clause']} ORDER BY searched_at DESC, id DESC LIMIT %d";
+		$sql   = "SELECT {$table}.id, {$table}.search_term, {$table}.searched_at, {$table}.source, {$table}.matched_post_types, {$table}.result_count, {$table}.session_id, {$table}.page_title, {$table}.page_url, {$table}.referrer, {$table}.page_type, u.display_name, u.user_login FROM {$table} LEFT JOIN {$wpdb->users} AS u ON {$table}.user_id = u.ID {$where['clause']} ORDER BY {$table}.searched_at DESC, {$table}.id DESC LIMIT %d";
 
 		$params   = $where['params'];
 		$params[] = $limit;
@@ -220,7 +220,7 @@ final class SearchRepository {
 		$table    = esc_sql( Constants::table_name() );
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$sql      = "SELECT id, search_term, searched_at, source, matched_post_types, result_count, user_id, session_id, blog_id, page_title, page_url, referrer, page_type FROM {$table} {$where['clause']} ORDER BY searched_at DESC, id DESC LIMIT %d OFFSET %d";
+		$sql      = "SELECT {$table}.id, {$table}.search_term, {$table}.searched_at, {$table}.source, {$table}.matched_post_types, {$table}.result_count, {$table}.blog_id, {$table}.page_title, {$table}.page_url, {$table}.referrer, {$table}.page_type, u.display_name, u.user_login FROM {$table} LEFT JOIN {$wpdb->users} AS u ON {$table}.user_id = u.ID {$where['clause']} ORDER BY {$table}.searched_at DESC, {$table}.id DESC LIMIT %d OFFSET %d";
 		$params   = $where['params'];
 		$params[] = $per_page;
 		$params[] = $offset;
@@ -445,9 +445,30 @@ final class SearchRepository {
 			$params[]  = $this->normalize_date_end( (string) $filters['date_to'] );
 		}
 
-		if ( isset( $filters['user_id'] ) && '' !== $filters['user_id'] ) {
-			$clauses[] = 'user_id = %d';
-			$params[]  = absint( $filters['user_id'] );
+		if ( ! empty( $filters['username'] ) ) {
+			$username = sanitize_text_field( $filters['username'] );
+			$table    = Constants::table_name();
+			if ( 'visiter' === strtolower( $username ) ) {
+				$clauses[] = "({$table}.user_id IS NULL OR {$table}.user_id = 0)";
+			} else {
+				$user_query = new \WP_User_Query(
+					array(
+						'search'         => '*' . $username . '*',
+						'search_columns' => array( 'user_login', 'display_name' ),
+						'fields'         => 'ID',
+					)
+				);
+				$user_ids   = $user_query->get_results();
+				if ( ! empty( $user_ids ) ) {
+					$user_ids_placeholders = implode( ',', array_fill( 0, count( $user_ids ), '%d' ) );
+					$clauses[]             = "{$table}.user_id IN ({$user_ids_placeholders})";
+					foreach ( $user_ids as $uid ) {
+						$params[] = absint( $uid );
+					}
+				} else {
+					$clauses[] = '1=0';
+				}
+			}
 		}
 
 		if ( ! empty( $filters['session_id'] ) ) {

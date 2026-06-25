@@ -46,7 +46,10 @@
 .sai-admin-header::before {
 	content: '';
 	position: absolute;
-	top: 0; right: 0; bottom: 0; left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
 	background: radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 50%);
 	pointer-events: none;
 }
@@ -150,8 +153,8 @@
 	border: 1px solid var(--sai-border) !important;
 	border-radius: var(--sai-radius-lg) !important;
 	box-shadow: var(--sai-shadow-md) !important;
-	padding: 24px !important;
-	margin-bottom: 24px !important;
+	padding: 15px !important;
+	margin-bottom: 10px !important;
 	transition: box-shadow 0.3s ease;
 }
 
@@ -163,8 +166,8 @@
 .search-analytics-insights-panel h3 {
 	margin-top: 0 !important;
 	margin-bottom: 18px !important;
-	font-size: 1.25rem !important;
-	font-weight: 700 !important;
+	font-size: 1rem !important;
+	font-weight: 600 !important;
 	color: var(--sai-text) !important;
 	border-bottom: 1px solid var(--sai-border) !important;
 	padding-bottom: 12px !important;
@@ -175,7 +178,7 @@
 	display: grid !important;
 	grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)) !important;
 	gap: 16px !important;
-	margin-bottom: 0 !important;
+	margin-bottom: 10px !important;
 }
 
 .search-analytics-insights-card {
@@ -370,7 +373,7 @@
 }
 
 .search-analytics-insights-wrap table.widefat tbody td {
-	padding: 14px 16px !important;
+	padding: 10px !important;
 	font-size: 0.9rem !important;
 	border-bottom: 1px solid var(--sai-border) !important;
 	vertical-align: middle !important;
@@ -385,62 +388,335 @@
 }
 
 /* --- Advanced Filters --- */
-.search-analytics-insights-filters {
-	margin-bottom: 24px !important;
-	padding: 16px 20px !important;
+.sai-filters-card {
 	background: var(--sai-surface) !important;
 	border: 1px solid var(--sai-border) !important;
 	border-radius: var(--sai-radius-lg) !important;
 	box-shadow: var(--sai-shadow-md) !important;
+	margin-bottom: 24px !important;
+	overflow: hidden !important;
 }
 
-.search-analytics-insights-filter-row {
-	display: grid !important;
-	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
-	gap: 16px !important;
+.sai-filters-header {
+	display: flex !important;
 	align-items: center !important;
+	justify-content: space-between !important;
+	padding: 18px 24px !important;
+	border-bottom: 1px solid var(--sai-border) !important;
+	background-color: var(--sai-surface) !important;
 }
 
-.search-analytics-insights-filter-row label {
-	font-weight: 600 !important;
-	font-size: 0.85rem !important;
+.sai-filters-header-title {
+	display: flex !important;
+	align-items: center !important;
+	gap: 12px !important;
+}
+
+.sai-filters-header-title h3 {
+	margin: 0 !important;
+	font-size: 1.15rem !important;
+	font-weight: 700 !important;
 	color: var(--sai-text) !important;
-	display: block !important;
-	margin-bottom: 4px !important;
+	border-bottom: none !important;
+	padding-bottom: 0 !important;
 }
 
-.search-analytics-insights-filter-row input[type="date"],
-.search-analytics-insights-filter-row input[type="search"],
-.search-analytics-insights-filter-row select {
-	width: 100% !important;
-	height: 38px !important;
+.sai-filters-header-title p.description {
+	margin: 2px 0 0 0 !important;
+	font-size: 0.85rem !important;
+	color: var(--sai-muted) !important;
+}
+
+.sai-filter-icon {
+	font-size: 20px !important;
+	width: 20px !important;
+	height: 20px !important;
+	color: var(--sai-accent) !important;
+}
+
+.sai-filters-toggle-btn {
+	display: inline-flex !important;
+	align-items: center !important;
+	gap: 6px !important;
+	text-decoration: none !important;
+	color: var(--sai-accent) !important;
+	font-weight: 600 !important;
+	font-size: 0.875rem !important;
+	cursor: pointer !important;
+	padding: 6px 12px !important;
 	border: 1px solid var(--sai-border) !important;
 	border-radius: var(--sai-radius-md) !important;
-	background-color: var(--sai-surface) !important;
-	padding: 6px 12px !important;
-	box-sizing: border-box !important;
-	font-size: 0.9rem !important;
-}
-
-.search-analytics-insights-filter-row input[type="checkbox"] {
-	margin-top: 0 !important;
-	vertical-align: middle !important;
-}
-
-.search-analytics-insights-filter-row input[type="submit"] {
-	height: 38px !important;
-	margin-top: 22px !important;
-	font-weight: 600 !important;
-	border-radius: var(--sai-radius-md) !important;
-	background: var(--sai-accent) !important;
-	border-color: var(--sai-accent) !important;
-	box-shadow: var(--sai-shadow-sm) !important;
+	background: transparent !important;
 	transition: all 0.2s ease !important;
 }
 
-.search-analytics-insights-filter-row input[type="submit"]:hover {
+.sai-filters-toggle-btn:hover {
+	background-color: var(--sai-surface-alt) !important;
+	border-color: var(--sai-accent) !important;
+	color: var(--sai-accent-hover) !important;
+}
+
+.sai-filters-toggle-btn .dashicons {
+	font-size: 16px !important;
+	width: 16px !important;
+	height: 16px !important;
+	transition: transform 0.3s ease !important;
+}
+
+.sai-filters-toggle-btn.collapsed .dashicons {
+	transform: rotate(180deg) !important;
+}
+
+/* Form Container and Smooth Animation */
+.sai-filters-form {
+	max-height: 2000px !important;
+	transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+	overflow: hidden !important;
+}
+
+.sai-filters-form.collapsed {
+	max-height: 0 !important;
+}
+
+.sai-filters-form-inner {
+	padding: 24px !important;
+}
+
+/* Grid Layout */
+.sai-filters-grid {
+	display: grid !important;
+	grid-template-columns: repeat(3, 1fr) !important;
+	gap: 20px !important;
+	margin-bottom: 24px !important;
+}
+
+@media (max-width: 960px) {
+	.sai-filters-grid {
+		grid-template-columns: repeat(2, 1fr) !important;
+	}
+}
+
+@media (max-width: 600px) {
+	.sai-filters-grid {
+		grid-template-columns: 1fr !important;
+		gap: 16px !important;
+	}
+}
+
+/* Filter Fields styling */
+.sai-filter-field {
+	display: flex !important;
+	flex-direction: column !important;
+	gap: 6px !important;
+}
+
+.sai-filter-field label {
+	font-weight: 600 !important;
+	font-size: 0.85rem !important;
+	color: var(--sai-text) !important;
+}
+
+.sai-filter-field input[type="date"],
+.sai-filter-field input[type="text"],
+.sai-filter-field input[type="search"],
+.sai-filter-field select {
+	width: 100% !important;
+	height: 40px !important;
+	border: 1px solid var(--sai-border) !important;
+	border-radius: var(--sai-radius-md) !important;
+	background-color: var(--sai-surface) !important;
+	box-sizing: border-box !important;
+	font-size: 0.9rem !important;
+	color: var(--sai-text) !important;
+	transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.sai-filter-field input:focus,
+.sai-filter-field select:focus {
+	border-color: var(--sai-accent) !important;
+	box-shadow: 0 0 0 1px var(--sai-accent) !important;
+	outline: none !important;
+}
+
+/* Icon Inside Inputs */
+.sai-input-icon-wrapper {
+	position: relative !important;
+	width: 100% !important;
+}
+
+.sai-input-icon-wrapper .dashicons {
+	position: absolute !important;
+	left: 12px !important;
+	top: 50% !important;
+	transform: translateY(-50%) !important;
+	color: var(--sai-muted) !important;
+	pointer-events: none !important;
+	font-size: 18px !important;
+	width: 18px !important;
+	height: 18px !important;
+}
+
+.sai-input-icon-wrapper input {
+	padding-left: 38px !important;
+}
+
+/* Checkbox alignment */
+.sai-filter-field-checkbox {
+	justify-content: center !important;
+}
+
+.sai-filter-field-checkbox label {
+	display: inline-flex !important;
+	align-items: center !important;
+	gap: 8px !important;
+	cursor: pointer !important;
+}
+
+.sai-filter-field-checkbox input[type="checkbox"] {
+	margin: 0 !important;
+	width: 16px !important;
+	height: 16px !important;
+}
+
+.sai-filter-field-checkbox p.description {
+	margin: 2px 0 0 24px !important;
+	font-size: 0.8rem !important;
+	color: var(--sai-muted) !important;
+}
+
+/* Actions Buttons Area */
+.sai-filters-actions {
+	display: flex !important;
+	justify-content: space-between !important;
+	align-items: center !important;
+	margin-bottom: 0 !important;
+	padding-top: 16px !important;
+	border-top: 1px solid var(--sai-border) !important;
+}
+
+.sai-filter-submit-btn {
+	background: var(--sai-accent) !important;
+	border-color: var(--sai-accent) !important;
+	color: #ffffff !important;
+	height: 40px !important;
+	padding: 0 20px !important;
+	font-weight: 600 !important;
+	border-radius: var(--sai-radius-md) !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	gap: 8px !important;
+	cursor: pointer !important;
+	transition: all 0.2s ease !important;
+}
+
+.sai-filter-submit-btn:hover {
 	background: var(--sai-accent-hover) !important;
 	border-color: var(--sai-accent-hover) !important;
+	color: #ffffff !important;
+}
+
+.sai-filter-submit-btn .dashicons {
+	font-size: 16px !important;
+	width: 16px !important;
+	height: 16px !important;
+	line-height: 1 !important;
+}
+
+.sai-filter-reset-btn {
+	background: #ffffff !important;
+	border: 1px solid var(--sai-border) !important;
+	color: var(--sai-text) !important;
+	height: 40px !important;
+	padding: 0 16px !important;
+	font-weight: 600 !important;
+	border-radius: var(--sai-radius-md) !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	gap: 6px !important;
+	cursor: pointer !important;
+	text-decoration: none !important;
+	transition: all 0.2s ease !important;
+}
+
+.sai-filter-reset-btn:hover {
+	background: var(--sai-surface-alt) !important;
+	border-color: var(--sai-muted) !important;
+	color: var(--sai-accent) !important;
+}
+
+.sai-filter-reset-btn .dashicons {
+	font-size: 16px !important;
+	width: 16px !important;
+	height: 16px !important;
+	line-height: 1 !important;
+}
+
+/* Tip / Information Box */
+.sai-filters-tip-box {
+	display: flex !important;
+	align-items: flex-start !important;
+	gap: 12px !important;
+	background-color: var(--sai-success-soft) !important;
+	border: 1px solid rgba(16, 185, 129, 0.15) !important;
+	border-radius: var(--sai-radius-md) !important;
+	padding: 14px 18px !important;
+	margin-top: 20px !important;
+}
+
+.sai-filters-tip-box .dashicons {
+	color: var(--sai-success) !important;
+	font-size: 20px !important;
+	width: 20px !important;
+	height: 20px !important;
+	margin-top: 2px !important;
+}
+
+.sai-filters-tip-box p {
+	margin: 0 !important;
+	font-size: 0.875rem !important;
+	color: #065f46 !important;
+	line-height: 1.5 !important;
+	font-weight: 500 !important;
+}
+
+/* Summary Bar */
+.sai-filters-summary-bar {
+	display: flex !important;
+	justify-content: space-between !important;
+	align-items: center !important;
+	background-color: var(--sai-surface-alt) !important;
+	border-top: 1px solid var(--sai-border) !important;
+	padding: 14px 24px !important;
+}
+
+.sai-filters-summary-left {
+	display: flex !important;
+	align-items: center !important;
+	gap: 8px !important;
+	font-size: 0.9rem !important;
+	color: var(--sai-text) !important;
+}
+
+.sai-active-filters-list {
+	color: var(--sai-muted) !important;
+	font-weight: 500 !important;
+}
+
+.sai-filters-summary-right {
+	display: flex !important;
+	align-items: center !important;
+	gap: 8px !important;
+	font-size: 0.9rem !important;
+}
+
+.sai-summary-total-label {
+	color: var(--sai-muted) !important;
+}
+
+.sai-summary-total-value {
+	color: var(--sai-accent) !important;
+	font-size: 1.1rem !important;
+	font-weight: 800 !important;
 }
 
 /* --- Settings Form --- */
@@ -583,15 +859,6 @@
 
 	.sai-admin-header h1 {
 		font-size: 1.6rem !important;
-	}
-
-	.search-analytics-insights-filter-row {
-		grid-template-columns: 1fr !important;
-		gap: 12px !important;
-	}
-
-	.search-analytics-insights-filter-row input[type="submit"] {
-		margin-top: 8px !important;
 	}
 
 	.search-analytics-insights-panel .form-table th {

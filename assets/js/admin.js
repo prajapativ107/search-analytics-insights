@@ -60,6 +60,56 @@
 				}
 			);
 
+			// Collapsible toggle logic for Search Filters with localStorage persistence.
+			const filterToggleBtn = wrapper.querySelector( '.sai-filters-toggle-btn' );
+			const filtersForm     = wrapper.querySelector( '.sai-filters-form' );
+			if (filterToggleBtn && filtersForm) {
+				const toggleText = filterToggleBtn.querySelector( '.sai-toggle-text' );
+				const toggleIcon = filterToggleBtn.querySelector( '.dashicons' );
+
+				const setFiltersState = function (isCollapsed) {
+					if (isCollapsed) {
+						filtersForm.classList.add( 'collapsed' );
+						filterToggleBtn.classList.add( 'collapsed' );
+						filterToggleBtn.setAttribute( 'aria-expanded', 'false' );
+						if (toggleText) {
+							toggleText.textContent = filterToggleBtn.getAttribute( 'data-show-text' ) || 'Show Filters';
+						}
+						if (toggleIcon) {
+							toggleIcon.className = 'dashicons dashicons-arrow-down-alt2';
+						}
+					} else {
+						filtersForm.classList.remove( 'collapsed' );
+						filterToggleBtn.classList.remove( 'collapsed' );
+						filterToggleBtn.setAttribute( 'aria-expanded', 'true' );
+						if (toggleText) {
+							toggleText.textContent = filterToggleBtn.getAttribute( 'data-hide-text' ) || 'Hide Filters';
+						}
+						if (toggleIcon) {
+							toggleIcon.className = 'dashicons dashicons-arrow-up-alt2';
+						}
+					}
+				};
+
+				// Initial state from localStorage (default: expanded)
+				const storedState = localStorage.getItem( 'sai_filters_collapsed' );
+				if (storedState === 'true') {
+					setFiltersState( true );
+				} else {
+					setFiltersState( false );
+				}
+
+				filterToggleBtn.addEventListener(
+					'click',
+					function (e) {
+						e.preventDefault();
+						const isCurrentlyCollapsed = filtersForm.classList.contains( 'collapsed' );
+						setFiltersState( ! isCurrentlyCollapsed );
+						localStorage.setItem( 'sai_filters_collapsed', ( ! isCurrentlyCollapsed ).toString() );
+					}
+				);
+			}
+
 			if ( ! buttons.length) {
 				return;
 			}

@@ -147,7 +147,7 @@ final class Menu {
 	private function export_to_csv(): void {
 		global $wpdb;
 
-		// Set headers for download
+		// Set headers for download.
 		header( 'Content-Type: text/csv; charset=utf-8' );
 		header( 'Content-Disposition: attachment; filename=search-analytics-export-' . gmdate( 'Y-m-d' ) . '.csv' );
 		header( 'Pragma: no-cache' );
@@ -158,58 +158,85 @@ final class Menu {
 			wp_die( esc_html__( 'Failed to generate export file.', 'search-analytics-insights' ) );
 		}
 
-		// CSV Column headers
-		fputcsv(
-			$output,
-			array(
-				__( 'ID', 'search-analytics-insights' ),
-				__( 'Search Term', 'search-analytics-insights' ),
-				__( 'Searched At', 'search-analytics-insights' ),
-				__( 'Source', 'search-analytics-insights' ),
-				__( 'Matched Post Types', 'search-analytics-insights' ),
-				__( 'Result Count', 'search-analytics-insights' ),
-				__( 'User ID', 'search-analytics-insights' ),
-				__( 'Session ID', 'search-analytics-insights' ),
-				__( 'Page Title', 'search-analytics-insights' ),
-				__( 'Page URL', 'search-analytics-insights' ),
-				__( 'Referrer', 'search-analytics-insights' ),
-				__( 'Page Type', 'search-analytics-insights' ),
-			)
+		// Write the UTF-8 BOM to ensure spreadsheet applications display special characters correctly.
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite
+		fwrite( $output, "\xEF\xBB\xBF" );
+
+		// CSV Column headers.
+		$headers = array(
+			__( 'ID', 'search-analytics-insights' ),
+			__( 'Search Term', 'search-analytics-insights' ),
+			__( 'Searched At', 'search-analytics-insights' ),
+			__( 'Source', 'search-analytics-insights' ),
+			__( 'Matched Post Types', 'search-analytics-insights' ),
+			__( 'Result Count', 'search-analytics-insights' ),
+			__( 'Username', 'search-analytics-insights' ),
+			__( 'Page Title', 'search-analytics-insights' ),
+			__( 'Page URL', 'search-analytics-insights' ),
+			__( 'Referrer', 'search-analytics-insights' ),
+			__( 'Page Type', 'search-analytics-insights' ),
 		);
 
-		// Batch fetch search logs
+		fputcsv( $output, array_map( array( $this, 'escape_csv_value' ), $headers ) );
+
+		// Batch fetch search logs.
 		$table  = Constants::table_name();
 		$limit  = 1000;
 		$offset = 0;
 
 		while ( true ) {
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$query = "SELECT id, search_term, searched_at, source, matched_post_types, result_count, user_id, session_id, page_title, page_url, referrer, page_type FROM {$table} ORDER BY id ASC LIMIT %d OFFSET %d";
+			$query = "SELECT {$table}.id, {$table}.search_term, {$table}.searched_at, {$table}.source, {$table}.matched_post_types, {$table}.result_count, {$table}.page_title, {$table}.page_url, {$table}.referrer, {$table}.page_type, u.display_name, u.user_login FROM {$table} LEFT JOIN {$wpdb->users} AS u ON {$table}.user_id = u.ID ORDER BY {$table}.id ASC LIMIT %d OFFSET %d";
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
-			$rows  = $wpdb->get_results( $wpdb->prepare( $query, $limit, $offset ), ARRAY_A );
+			$rows = $wpdb->get_results( $wpdb->prepare( $query, $limit, $offset ), ARRAY_A );
 
 			if ( empty( $rows ) ) {
 				break;
 			}
 
 			foreach ( $rows as $row ) {
-				fputcsv(
-					$output,
-					array(
-						$row['id'],
-						$row['search_term'],
-						$row['searched_at'],
-						$row['source'],
-						$row['matched_post_types'],
-						$row['result_count'],
-						$row['user_id'] ? $row['user_id'] : '',
-						$row['session_id'],
-						$row['page_title'],
-						$row['page_url'],
-						$row['referrer'],
-						$row['page_type'],
-					)
+				$post_id    = url_to_postid( $row['page_url'] );
+				$page_title = '';
+				if ( $post_id ) {
+					global $wp_query;
+					$original_id                 = isset( $wp_query->queried_object_id ) ? $wp_query->queried_object_id : null;
+					$wp_query->queried_object_id = $post_id;
+					$page_title                  = get_the_title( get_queried_object_id() );
+					if ( is_null( $original_id ) ) {
+						unset( $wp_query->queried_object_id );
+					} else {
+						$wp_query->queried_object_id = $original_id;
+					}
+				}
+
+				if ( empty( $page_title ) ) {
+					if ( home_url( '/' ) === user_trailingslashit( $row['page_url'] ) || home_url( '/' ) === $row['page_url'] || '/' === $row['page_url'] ) {
+						$page_title = __( 'Home', 'search-analytics-insights' );
+					} else {
+						// Clean the stored title just in case it doesn't have a post ID but has a title in the DB.
+						$site_name = get_bloginfo( 'name' );
+						$raw_title = $row['page_title'];
+						if ( ! empty( $raw_title ) ) {
+							$page_title = str_replace( array( " » {$site_name}", " - {$site_name}" ), '', $raw_title );
+						}
+					}
+				}
+
+				$csv_row = array(
+					$row['id'],
+					$row['search_term'],
+					$row['searched_at'],
+					$row['source'],
+					$row['matched_post_types'],
+					$row['result_count'],
+					$this->get_user_label( $row ),
+					$page_title,
+					$row['page_url'],
+					$row['referrer'],
+					$row['page_type'],
 				);
+
+				fputcsv( $output, array_map( array( $this, 'escape_csv_value' ), $csv_row ) );
 			}
 
 			$offset += $limit;
@@ -219,6 +246,45 @@ final class Menu {
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
 		fclose( $output );
 		exit;
+	}
+
+	/**
+	 * Escape a CSV value to prevent CSV Injection / Formula Injection.
+	 *
+	 * @param mixed $value The value to escape.
+	 *
+	 * @return string The escaped value.
+	 */
+	private function escape_csv_value( $value ): string {
+		$value = (string) $value;
+		if ( '' === $value ) {
+			return '';
+		}
+
+		$dangerous_chars = array( '=', '+', '-', '@', "\t", "\r", "\n" );
+		$first_char      = substr( $value, 0, 1 );
+
+		if ( in_array( $first_char, $dangerous_chars, true ) ) {
+			return "'" . $value;
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Get the display label for the user column.
+	 *
+	 * @param array<string, mixed> $record Search record.
+	 *
+	 * @return string
+	 */
+	private function get_user_label( array $record ): string {
+		$display_name = ! empty( $record['display_name'] ) ? (string) $record['display_name'] : '';
+		if ( '' !== $display_name ) {
+			return $display_name;
+		}
+
+		return ! empty( $record['user_login'] ) ? (string) $record['user_login'] : __( 'visiter', 'search-analytics-insights' );
 	}
 
 	/**
