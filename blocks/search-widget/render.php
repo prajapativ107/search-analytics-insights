@@ -71,14 +71,14 @@ wp_enqueue_script(
 	data-limit="<?php echo esc_attr( (string) $settings->get_max_results() ); ?>"
 	data-show-featured-images="<?php echo esc_attr( $show_featured_images ? '1' : '0' ); ?>"
 	data-show-post-type-label="<?php echo esc_attr( $settings->get_show_post_type_label() ? '1' : '0' ); ?>"
-	data-loading-text="<?php echo esc_attr__( 'Searching...', Constants::TEXT_DOMAIN ); ?>"
-	data-empty-text="<?php echo esc_attr__( 'No results found.', Constants::TEXT_DOMAIN ); ?>"
-	data-error-text="<?php echo esc_attr__( 'Unable to search right now.', Constants::TEXT_DOMAIN ); ?>"
+	data-loading-text="<?php echo esc_attr__( 'Searching...', 'search-analytics-insights' ); ?>"
+	data-empty-text="<?php echo esc_attr__( 'No results found.', 'search-analytics-insights' ); ?>"
+	data-error-text="<?php echo esc_attr__( 'Unable to search right now.', 'search-analytics-insights' ); ?>"
 >
 	<button
 		type="button"
 		class="search-analytics-insights-search-toggle"
-		aria-label="<?php echo esc_attr( $show_label ? __( 'Open search', Constants::TEXT_DOMAIN ) : __( 'Search', Constants::TEXT_DOMAIN ) ); ?>"
+		aria-label="<?php echo esc_attr( $show_label ? __( 'Open search', 'search-analytics-insights' ) : __( 'Search', 'search-analytics-insights' ) ); ?>"
 		aria-expanded="false"
 		aria-controls="<?php echo esc_attr( $popup_id ); ?>"
 	>
@@ -86,14 +86,14 @@ wp_enqueue_script(
 			<?php echo SearchWidget::get_icon_markup(); ?>
 		</span>
 		<?php if ( $show_label ) : ?>
-			<span class="search-analytics-insights-search-toggle-label"><?php esc_html_e( 'Search', Constants::TEXT_DOMAIN ); ?></span>
+			<span class="search-analytics-insights-search-toggle-label"><?php esc_html_e( 'Search', 'search-analytics-insights' ); ?></span>
 		<?php endif; ?>
 	</button>
 
 	<div id="<?php echo esc_attr( $popup_id ); ?>" class="search-analytics-insights-search-popup" hidden aria-hidden="true" inert>
 		<div class="search-analytics-insights-search-panel">
 			<?php if ( 'modal' === $open_mode ) : ?>
-				<button type="button" class="search-analytics-insights-search-close" aria-label="<?php echo esc_attr__( 'Close search', Constants::TEXT_DOMAIN ); ?>">
+				<button type="button" class="search-analytics-insights-search-close" aria-label="<?php echo esc_attr__( 'Close search', 'search-analytics-insights' ); ?>">
 					<span aria-hidden="true">&times;</span>
 				</button>
 			<?php endif; ?>

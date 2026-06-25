@@ -75,7 +75,7 @@ final class Plugin {
 	 */
 	public function load_textdomain(): void {
 		load_plugin_textdomain(
-			Constants::TEXT_DOMAIN,
+			'search-analytics-insights',
 			false,
 			dirname( plugin_basename( SEARCH_ANALYTICS_INSIGHTS_FILE ) ) . '/languages'
 		);

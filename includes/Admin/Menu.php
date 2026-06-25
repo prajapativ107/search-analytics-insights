@@ -44,8 +44,8 @@ final class Menu {
 	public function register_menu(): void {
 		// Parent top-level menu (mapped to dashboard page render)
 		add_menu_page(
-			esc_html__( 'Search Analytics', Constants::TEXT_DOMAIN ),
-			esc_html__( 'Search Analytics', Constants::TEXT_DOMAIN ),
+			esc_html__( 'Search Analytics', 'search-analytics-insights' ),
+			esc_html__( 'Search Analytics', 'search-analytics-insights' ),
 			Constants::CAPABILITY,
 			'search-analytics-insights',
 			array( $this->dashboard, 'render_dashboard_page' ),
@@ -56,8 +56,8 @@ final class Menu {
 		// Submenu: Dashboard
 		add_submenu_page(
 			'search-analytics-insights',
-			esc_html__( 'Dashboard', Constants::TEXT_DOMAIN ),
-			esc_html__( 'Dashboard', Constants::TEXT_DOMAIN ),
+			esc_html__( 'Dashboard', 'search-analytics-insights' ),
+			esc_html__( 'Dashboard', 'search-analytics-insights' ),
 			Constants::CAPABILITY,
 			'search-analytics-insights',
 			''
@@ -66,8 +66,8 @@ final class Menu {
 		// Submenu: Analytics & Insights
 		add_submenu_page(
 			'search-analytics-insights',
-			esc_html__( 'Analytics & Insights', Constants::TEXT_DOMAIN ),
-			esc_html__( 'Analytics & Insights', Constants::TEXT_DOMAIN ),
+			esc_html__( 'Analytics & Insights', 'search-analytics-insights' ),
+			esc_html__( 'Analytics & Insights', 'search-analytics-insights' ),
 			Constants::CAPABILITY,
 			'search-analytics-analytics',
 			array( $this->dashboard, 'render_analytics_page' )
@@ -76,8 +76,8 @@ final class Menu {
 		// Submenu: Search Settings
 		add_submenu_page(
 			'search-analytics-insights',
-			esc_html__( 'Search Settings', Constants::TEXT_DOMAIN ),
-			esc_html__( 'Search Settings', Constants::TEXT_DOMAIN ),
+			esc_html__( 'Search Settings', 'search-analytics-insights' ),
+			esc_html__( 'Search Settings', 'search-analytics-insights' ),
 			Constants::CAPABILITY,
 			'search-analytics-settings',
 			array( $this->dashboard, 'render_settings_page' )
@@ -86,8 +86,8 @@ final class Menu {
 		// Submenu: Tools
 		add_submenu_page(
 			'search-analytics-insights',
-			esc_html__( 'Tools', Constants::TEXT_DOMAIN ),
-			esc_html__( 'Tools', Constants::TEXT_DOMAIN ),
+			esc_html__( 'Tools', 'search-analytics-insights' ),
+			esc_html__( 'Tools', 'search-analytics-insights' ),
 			Constants::CAPABILITY,
 			'search-analytics-tools',
 			array( $this->dashboard, 'render_tools_page' )
@@ -96,8 +96,8 @@ final class Menu {
 		// Submenu: Help & Documentation
 		add_submenu_page(
 			'search-analytics-insights',
-			esc_html__( 'Help & Documentation', Constants::TEXT_DOMAIN ),
-			esc_html__( 'Help & Docs', Constants::TEXT_DOMAIN ),
+			esc_html__( 'Help & Documentation', 'search-analytics-insights' ),
+			esc_html__( 'Help & Docs', 'search-analytics-insights' ),
 			Constants::CAPABILITY,
 			'search-analytics-help',
 			array( $this->dashboard, 'render_help_page' )
@@ -126,7 +126,7 @@ final class Menu {
 
 		// Verify Nonce
 		if ( ! isset( $_POST['sai_tools_nonce'] ) || ! wp_verify_nonce( $_POST['sai_tools_nonce'], 'sai_tools_action' ) ) {
-			wp_die( esc_html__( 'Security check failed.', Constants::TEXT_DOMAIN ) );
+			wp_die( esc_html__( 'Security check failed.', 'search-analytics-insights' ) );
 		}
 
 		if ( 'export' === $action ) {
@@ -154,21 +154,21 @@ final class Menu {
 
 		$output = fopen( 'php://output', 'w' );
 		if ( ! $output ) {
-			wp_die( esc_html__( 'Failed to generate export file.', Constants::TEXT_DOMAIN ) );
+			wp_die( esc_html__( 'Failed to generate export file.', 'search-analytics-insights' ) );
 		}
 
 		// CSV Column headers
 		fputcsv(
 			$output,
 			array(
-				__( 'ID', Constants::TEXT_DOMAIN ),
-				__( 'Search Term', Constants::TEXT_DOMAIN ),
-				__( 'Searched At', Constants::TEXT_DOMAIN ),
-				__( 'Source', Constants::TEXT_DOMAIN ),
-				__( 'Matched Post Types', Constants::TEXT_DOMAIN ),
-				__( 'Result Count', Constants::TEXT_DOMAIN ),
-				__( 'User ID', Constants::TEXT_DOMAIN ),
-				__( 'Session ID', Constants::TEXT_DOMAIN ),
+				__( 'ID', 'search-analytics-insights' ),
+				__( 'Search Term', 'search-analytics-insights' ),
+				__( 'Searched At', 'search-analytics-insights' ),
+				__( 'Source', 'search-analytics-insights' ),
+				__( 'Matched Post Types', 'search-analytics-insights' ),
+				__( 'Result Count', 'search-analytics-insights' ),
+				__( 'User ID', 'search-analytics-insights' ),
+				__( 'Session ID', 'search-analytics-insights' ),
 			)
 		);
 

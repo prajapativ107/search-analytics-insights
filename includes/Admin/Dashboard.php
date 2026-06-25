@@ -53,24 +53,24 @@ final class Dashboard {
 			<div class="sai-dashboard-grid">
 				<div class="sai-card-column">
 				<div class="search-analytics-insights-panel sai-panel">
-					<h3><?php esc_html_e( 'Overview Summary', Constants::TEXT_DOMAIN ); ?></h3>
+					<h3><?php esc_html_e( 'Overview Summary', 'search-analytics-insights' ); ?></h3>
 					<div class="search-analytics-insights-summary">
-						<?php $this->render_summary_card( __( 'Total Searches', Constants::TEXT_DOMAIN ), (int) $summary['total_searches'] ); ?>
-						<?php $this->render_summary_card( __( 'Unique Searches', Constants::TEXT_DOMAIN ), (int) $summary['unique_searches'] ); ?>
-						<?php $this->render_summary_card( __( 'No Results', Constants::TEXT_DOMAIN ), (int) $summary['no_result_searches'] ); ?>
+						<?php $this->render_summary_card( __( 'Total Searches', 'search-analytics-insights' ), (int) $summary['total_searches'] ); ?>
+						<?php $this->render_summary_card( __( 'Unique Searches', 'search-analytics-insights' ), (int) $summary['unique_searches'] ); ?>
+						<?php $this->render_summary_card( __( 'No Results', 'search-analytics-insights' ), (int) $summary['no_result_searches'] ); ?>
 					</div>
 				</div>
 				
 				<div class="search-analytics-insights-panel sai-panel">
-					<h3><?php esc_html_e( 'Quick Actions', Constants::TEXT_DOMAIN ); ?></h3>
+					<h3><?php esc_html_e( 'Quick Actions', 'search-analytics-insights' ); ?></h3>
 					<div class="sai-quick-actions">
-						<a href="<?php echo esc_url( admin_url( 'admin.php?page=search-analytics-analytics' ) ); ?>" class="button button-primary"><?php esc_html_e( 'View Analytics', Constants::TEXT_DOMAIN ); ?></a>
-						<a href="<?php echo esc_url( admin_url( 'admin.php?page=search-analytics-settings' ) ); ?>" class="button button-secondary"><?php esc_html_e( 'Manage Settings', Constants::TEXT_DOMAIN ); ?></a>
-						<a href="<?php echo esc_url( admin_url( 'admin.php?page=search-analytics-help' ) ); ?>" class="button button-secondary"><?php esc_html_e( 'Read Help Docs', Constants::TEXT_DOMAIN ); ?></a>
+						<a href="<?php echo esc_url( admin_url( 'admin.php?page=search-analytics-analytics' ) ); ?>" class="button button-primary"><?php esc_html_e( 'View Analytics', 'search-analytics-insights' ); ?></a>
+						<a href="<?php echo esc_url( admin_url( 'admin.php?page=search-analytics-settings' ) ); ?>" class="button button-secondary"><?php esc_html_e( 'Manage Settings', 'search-analytics-insights' ); ?></a>
+						<a href="<?php echo esc_url( admin_url( 'admin.php?page=search-analytics-help' ) ); ?>" class="button button-secondary"><?php esc_html_e( 'Read Help Docs', 'search-analytics-insights' ); ?></a>
 						<form method="post" action="<?php echo esc_url( admin_url( 'admin.php?page=search-analytics-tools' ) ); ?>">
 							<?php wp_nonce_field( 'sai_tools_action', 'sai_tools_nonce' ); ?>
 							<input type="hidden" name="sai_action" value="export" />
-							<button type="submit" class="button button-secondary"><?php esc_html_e( 'Export to CSV', Constants::TEXT_DOMAIN ); ?></button>
+							<button type="submit" class="button button-secondary"><?php esc_html_e( 'Export to CSV', 'search-analytics-insights' ); ?></button>
 						</form>
 					</div>
 				</div>
@@ -78,17 +78,17 @@ final class Dashboard {
 
 				<div class="sai-card-column">
 					<div class="search-analytics-insights-panel sai-panel">
-						<h3><?php esc_html_e( 'Top Searches (Overall)', Constants::TEXT_DOMAIN ); ?></h3>
+						<h3><?php esc_html_e( 'Top Searches (Overall)', 'search-analytics-insights' ); ?></h3>
 						<table class="widefat striped">
 							<thead>
 								<tr>
-									<th><?php esc_html_e( 'Term', Constants::TEXT_DOMAIN ); ?></th>
-									<th><?php esc_html_e( 'Searches', Constants::TEXT_DOMAIN ); ?></th>
+									<th><?php esc_html_e( 'Term', 'search-analytics-insights' ); ?></th>
+									<th><?php esc_html_e( 'Searches', 'search-analytics-insights' ); ?></th>
 								</tr>
 							</thead>
 							<tbody>
 								<?php if ( empty( $top_terms ) ) : ?>
-									<tr><td colspan="2"><?php esc_html_e( 'No search terms recorded yet.', Constants::TEXT_DOMAIN ); ?></td></tr>
+									<tr><td colspan="2"><?php esc_html_e( 'No search terms recorded yet.', 'search-analytics-insights' ); ?></td></tr>
 								<?php else : ?>
 									<?php foreach ( $top_terms as $row ) : ?>
 										<tr>
@@ -102,18 +102,18 @@ final class Dashboard {
 					</div>
 
 					<div class="search-analytics-insights-panel sai-panel">
-						<h3><?php esc_html_e( 'Recent Search Activity', Constants::TEXT_DOMAIN ); ?></h3>
+						<h3><?php esc_html_e( 'Recent Search Activity', 'search-analytics-insights' ); ?></h3>
 						<table class="widefat striped">
 							<thead>
 								<tr>
-									<th><?php esc_html_e( 'Term', Constants::TEXT_DOMAIN ); ?></th>
-									<th><?php esc_html_e( 'Date', Constants::TEXT_DOMAIN ); ?></th>
-									<th><?php esc_html_e( 'Results', Constants::TEXT_DOMAIN ); ?></th>
+									<th><?php esc_html_e( 'Term', 'search-analytics-insights' ); ?></th>
+									<th><?php esc_html_e( 'Date', 'search-analytics-insights' ); ?></th>
+									<th><?php esc_html_e( 'Results', 'search-analytics-insights' ); ?></th>
 								</tr>
 							</thead>
 							<tbody>
 								<?php if ( empty( $recent_activity ) ) : ?>
-									<tr><td colspan="3"><?php esc_html_e( 'No search activity found.', Constants::TEXT_DOMAIN ); ?></td></tr>
+									<tr><td colspan="3"><?php esc_html_e( 'No search activity found.', 'search-analytics-insights' ); ?></td></tr>
 								<?php else : ?>
 									<?php foreach ( $recent_activity as $record ) : ?>
 										<tr>
@@ -163,50 +163,50 @@ final class Dashboard {
 			<form method="get" class="search-analytics-insights-filters">
 				<input type="hidden" name="page" value="search-analytics-analytics" />
 				<div class="search-analytics-insights-filter-row">
-					<label for="search-analytics-insights-date-from"><?php esc_html_e( 'From', Constants::TEXT_DOMAIN ); ?></label>
+					<label for="search-analytics-insights-date-from"><?php esc_html_e( 'From', 'search-analytics-insights' ); ?></label>
 					<input id="search-analytics-insights-date-from" type="date" name="date_from" value="<?php echo esc_attr( $filters['date_from'] ); ?>" />
 
-					<label for="search-analytics-insights-date-to"><?php esc_html_e( 'To', Constants::TEXT_DOMAIN ); ?></label>
+					<label for="search-analytics-insights-date-to"><?php esc_html_e( 'To', 'search-analytics-insights' ); ?></label>
 					<input id="search-analytics-insights-date-to" type="date" name="date_to" value="<?php echo esc_attr( $filters['date_to'] ); ?>" />
 
-					<label for="search-analytics-insights-term"><?php esc_html_e( 'Search term', Constants::TEXT_DOMAIN ); ?></label>
+					<label for="search-analytics-insights-term"><?php esc_html_e( 'Search term', 'search-analytics-insights' ); ?></label>
 					<input id="search-analytics-insights-term" type="search" name="search_term" value="<?php echo esc_attr( $filters['search_term'] ); ?>" />
 
 					<label for="search-analytics-insights-no-results">
 						<input id="search-analytics-insights-no-results" type="checkbox" name="no_results" value="1" <?php checked( 1, (int) $filters['no_results'] ); ?> />
-						<?php esc_html_e( 'No results only', Constants::TEXT_DOMAIN ); ?>
+						<?php esc_html_e( 'No results only', 'search-analytics-insights' ); ?>
 					</label>
 
-					<label for="search-analytics-insights-per-page"><?php esc_html_e( 'Per page', Constants::TEXT_DOMAIN ); ?></label>
+					<label for="search-analytics-insights-per-page"><?php esc_html_e( 'Per page', 'search-analytics-insights' ); ?></label>
 					<select id="search-analytics-insights-per-page" name="per_page">
 						<?php foreach ( array( 10, 20, 50, 100 ) as $option ) : ?>
 							<option value="<?php echo esc_attr( (string) $option ); ?>" <?php selected( $filters['per_page'], $option ); ?>><?php echo esc_html( (string) $option ); ?></option>
 						<?php endforeach; ?>
 					</select>
 
-					<?php submit_button( __( 'Filter', Constants::TEXT_DOMAIN ), 'primary', '', false ); ?>
+					<?php submit_button( __( 'Filter', 'search-analytics-insights' ), 'primary', '', false ); ?>
 				</div>
 			</form>
 
 			<div class="search-analytics-insights-summary">
-				<?php $this->render_summary_card( __( 'Total Searches', Constants::TEXT_DOMAIN ), (int) $summary['total_searches'] ); ?>
-				<?php $this->render_summary_card( __( 'Unique Searches', Constants::TEXT_DOMAIN ), (int) $summary['unique_searches'] ); ?>
-				<?php $this->render_summary_card( __( 'No Result Searches', Constants::TEXT_DOMAIN ), (int) $summary['no_result_searches'] ); ?>
+				<?php $this->render_summary_card( __( 'Total Searches', 'search-analytics-insights' ), (int) $summary['total_searches'] ); ?>
+				<?php $this->render_summary_card( __( 'Unique Searches', 'search-analytics-insights' ), (int) $summary['unique_searches'] ); ?>
+				<?php $this->render_summary_card( __( 'No Result Searches', 'search-analytics-insights' ), (int) $summary['no_result_searches'] ); ?>
 			</div>
 
 			<div class="search-analytics-insights-grid">
 				<div class="search-analytics-insights-panel">
-					<h2><?php esc_html_e( 'Searches per day', Constants::TEXT_DOMAIN ); ?></h2>
+					<h2><?php esc_html_e( 'Searches per day', 'search-analytics-insights' ); ?></h2>
 					<table class="widefat striped">
 						<thead>
 							<tr>
-								<th><?php esc_html_e( 'Date', Constants::TEXT_DOMAIN ); ?></th>
-								<th><?php esc_html_e( 'Searches', Constants::TEXT_DOMAIN ); ?></th>
+								<th><?php esc_html_e( 'Date', 'search-analytics-insights' ); ?></th>
+								<th><?php esc_html_e( 'Searches', 'search-analytics-insights' ); ?></th>
 							</tr>
 						</thead>
 						<tbody>
 							<?php if ( empty( $daily_counts ) ) : ?>
-								<tr><td colspan="2"><?php esc_html_e( 'No searches found for this range.', Constants::TEXT_DOMAIN ); ?></td></tr>
+								<tr><td colspan="2"><?php esc_html_e( 'No searches found for this range.', 'search-analytics-insights' ); ?></td></tr>
 							<?php else : ?>
 								<?php foreach ( $daily_counts as $row ) : ?>
 									<tr>
@@ -220,17 +220,17 @@ final class Dashboard {
 				</div>
 
 				<div class="search-analytics-insights-panel">
-					<h2><?php esc_html_e( 'Top Search Terms', Constants::TEXT_DOMAIN ); ?></h2>
+					<h2><?php esc_html_e( 'Top Search Terms', 'search-analytics-insights' ); ?></h2>
 					<table class="widefat striped">
 						<thead>
 							<tr>
-								<th><?php esc_html_e( 'Search Term', Constants::TEXT_DOMAIN ); ?></th>
-								<th><?php esc_html_e( 'Searches', Constants::TEXT_DOMAIN ); ?></th>
+								<th><?php esc_html_e( 'Search Term', 'search-analytics-insights' ); ?></th>
+								<th><?php esc_html_e( 'Searches', 'search-analytics-insights' ); ?></th>
 							</tr>
 						</thead>
 						<tbody>
 							<?php if ( empty( $top_terms ) ) : ?>
-								<tr><td colspan="2"><?php esc_html_e( 'No top search terms yet.', Constants::TEXT_DOMAIN ); ?></td></tr>
+								<tr><td colspan="2"><?php esc_html_e( 'No top search terms yet.', 'search-analytics-insights' ); ?></td></tr>
 							<?php else : ?>
 								<?php foreach ( $top_terms as $row ) : ?>
 									<tr>
@@ -244,17 +244,17 @@ final class Dashboard {
 				</div>
 
 				<div class="search-analytics-insights-panel">
-					<h2><?php esc_html_e( 'No Result Searches', Constants::TEXT_DOMAIN ); ?></h2>
+					<h2><?php esc_html_e( 'No Result Searches', 'search-analytics-insights' ); ?></h2>
 					<table class="widefat striped">
 						<thead>
 							<tr>
-								<th><?php esc_html_e( 'Search Term', Constants::TEXT_DOMAIN ); ?></th>
-								<th><?php esc_html_e( 'Searches', Constants::TEXT_DOMAIN ); ?></th>
+								<th><?php esc_html_e( 'Search Term', 'search-analytics-insights' ); ?></th>
+								<th><?php esc_html_e( 'Searches', 'search-analytics-insights' ); ?></th>
 							</tr>
 						</thead>
 						<tbody>
 							<?php if ( empty( $no_result_terms ) ) : ?>
-								<tr><td colspan="2"><?php esc_html_e( 'No searches with zero results have been recorded yet.', Constants::TEXT_DOMAIN ); ?></td></tr>
+								<tr><td colspan="2"><?php esc_html_e( 'No searches with zero results have been recorded yet.', 'search-analytics-insights' ); ?></td></tr>
 							<?php else : ?>
 								<?php foreach ( $no_result_terms as $row ) : ?>
 									<tr>
@@ -269,21 +269,21 @@ final class Dashboard {
 			</div>
 
 			<div class="search-analytics-insights-panel search-analytics-insights-table-panel">
-				<h2><?php esc_html_e( 'Aggregated Search Activity', Constants::TEXT_DOMAIN ); ?></h2>
-				<p><?php esc_html_e( 'Repeated searches are grouped by search term and user.', Constants::TEXT_DOMAIN ); ?></p>
+				<h2><?php esc_html_e( 'Aggregated Search Activity', 'search-analytics-insights' ); ?></h2>
+				<p><?php esc_html_e( 'Repeated searches are grouped by search term and user.', 'search-analytics-insights' ); ?></p>
 				<table class="widefat striped">
 					<thead>
 						<tr>
-							<th><?php esc_html_e( 'Search Term', Constants::TEXT_DOMAIN ); ?></th>
-							<th><?php esc_html_e( 'Search Count', Constants::TEXT_DOMAIN ); ?></th>
-							<th><?php esc_html_e( 'Last Searched', Constants::TEXT_DOMAIN ); ?></th>
-							<th><?php esc_html_e( 'Results', Constants::TEXT_DOMAIN ); ?></th>
-							<th><?php esc_html_e( 'User', Constants::TEXT_DOMAIN ); ?></th>
+							<th><?php esc_html_e( 'Search Term', 'search-analytics-insights' ); ?></th>
+							<th><?php esc_html_e( 'Search Count', 'search-analytics-insights' ); ?></th>
+							<th><?php esc_html_e( 'Last Searched', 'search-analytics-insights' ); ?></th>
+							<th><?php esc_html_e( 'Results', 'search-analytics-insights' ); ?></th>
+							<th><?php esc_html_e( 'User', 'search-analytics-insights' ); ?></th>
 						</tr>
 					</thead>
 					<tbody>
 						<?php if ( empty( $aggregated_activity['items'] ) ) : ?>
-							<tr><td colspan="5"><?php esc_html_e( 'No search records found.', Constants::TEXT_DOMAIN ); ?></td></tr>
+							<tr><td colspan="5"><?php esc_html_e( 'No search records found.', 'search-analytics-insights' ); ?></td></tr>
 						<?php else : ?>
 							<?php foreach ( $aggregated_activity['items'] as $record ) : ?>
 								<tr>
@@ -340,20 +340,20 @@ final class Dashboard {
 			</div>
 
 			<div class="search-analytics-insights-panel search-analytics-insights-table-panel">
-				<h2><?php esc_html_e( 'Recent Search Activity', Constants::TEXT_DOMAIN ); ?></h2>
-				<p><?php esc_html_e( 'The latest 20 raw search records.', Constants::TEXT_DOMAIN ); ?></p>
+				<h2><?php esc_html_e( 'Recent Search Activity', 'search-analytics-insights' ); ?></h2>
+				<p><?php esc_html_e( 'The latest 20 raw search records.', 'search-analytics-insights' ); ?></p>
 				<table class="widefat striped">
 					<thead>
 						<tr>
-							<th><?php esc_html_e( 'Search Term', Constants::TEXT_DOMAIN ); ?></th>
-							<th><?php esc_html_e( 'Date', Constants::TEXT_DOMAIN ); ?></th>
-							<th><?php esc_html_e( 'Results', Constants::TEXT_DOMAIN ); ?></th>
-							<th><?php esc_html_e( 'User', Constants::TEXT_DOMAIN ); ?></th>
+							<th><?php esc_html_e( 'Search Term', 'search-analytics-insights' ); ?></th>
+							<th><?php esc_html_e( 'Date', 'search-analytics-insights' ); ?></th>
+							<th><?php esc_html_e( 'Results', 'search-analytics-insights' ); ?></th>
+							<th><?php esc_html_e( 'User', 'search-analytics-insights' ); ?></th>
 						</tr>
 					</thead>
 					<tbody>
 						<?php if ( empty( $recent_activity ) ) : ?>
-							<tr><td colspan="4"><?php esc_html_e( 'No recent search activity found.', Constants::TEXT_DOMAIN ); ?></td></tr>
+							<tr><td colspan="4"><?php esc_html_e( 'No recent search activity found.', 'search-analytics-insights' ); ?></td></tr>
 						<?php else : ?>
 							<?php foreach ( $recent_activity as $record ) : ?>
 								<tr>
@@ -383,12 +383,12 @@ final class Dashboard {
 			function () {
 				?>
 			<div class="search-analytics-insights-panel sai-panel">
-				<h3><?php esc_html_e( 'Search Settings', Constants::TEXT_DOMAIN ); ?></h3>
-				<p class="search-analytics-insights-settings-description"><?php esc_html_e( 'Configure the search form, live results, sources, and analytics in one place.', Constants::TEXT_DOMAIN ); ?></p>
+				<h3><?php esc_html_e( 'Search Settings', 'search-analytics-insights' ); ?></h3>
+				<p class="search-analytics-insights-settings-description"><?php esc_html_e( 'Configure the search form, live results, sources, and analytics in one place.', 'search-analytics-insights' ); ?></p>
 				<form method="post" action="options.php">
 					<?php settings_fields( 'search_analytics_insights_settings' ); ?>
 					<?php do_settings_sections( 'search-analytics-insights' ); ?>
-					<?php submit_button( __( 'Save Settings', Constants::TEXT_DOMAIN ) ); ?>
+					<?php submit_button( __( 'Save Settings', 'search-analytics-insights' ) ); ?>
 				</form>
 			</div>
 				<?php
@@ -409,41 +409,41 @@ final class Dashboard {
 				?>
 			<div class="sai-tools-wrapper">
 				<?php if ( 'clear_success' === $message ) : ?>
-					<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'All search analytics data has been successfully cleared.', Constants::TEXT_DOMAIN ); ?></p></div>
+					<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'All search analytics data has been successfully cleared.', 'search-analytics-insights' ); ?></p></div>
 				<?php elseif ( 'reset_success' === $message ) : ?>
-					<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'All plugin settings have been successfully reset to defaults.', Constants::TEXT_DOMAIN ); ?></p></div>
+					<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'All plugin settings have been successfully reset to defaults.', 'search-analytics-insights' ); ?></p></div>
 				<?php endif; ?>
 
 				<!-- Export Card -->
 				<div class="search-analytics-insights-panel sai-panel">
-					<h3><?php esc_html_e( 'Export Analytics Data', Constants::TEXT_DOMAIN ); ?></h3>
-					<p><?php esc_html_e( 'Download the complete search logs database in CSV format for offline reporting or backups.', Constants::TEXT_DOMAIN ); ?></p>
+					<h3><?php esc_html_e( 'Export Analytics Data', 'search-analytics-insights' ); ?></h3>
+					<p><?php esc_html_e( 'Download the complete search logs database in CSV format for offline reporting or backups.', 'search-analytics-insights' ); ?></p>
 					<form method="post" action="">
 						<?php wp_nonce_field( 'sai_tools_action', 'sai_tools_nonce' ); ?>
 						<input type="hidden" name="sai_action" value="export" />
-						<?php submit_button( __( 'Download CSV Export', Constants::TEXT_DOMAIN ), 'primary', 'submit_export', false ); ?>
+						<?php submit_button( __( 'Download CSV Export', 'search-analytics-insights' ), 'primary', 'submit_export', false ); ?>
 					</form>
 				</div>
 
 				<!-- Clear Database Card -->
 				<div class="search-analytics-insights-panel sai-panel card-destructive">
-					<h3 class="destructive"><?php esc_html_e( 'Clear Search Logs', Constants::TEXT_DOMAIN ); ?></h3>
-					<p><?php esc_html_e( 'Warning: This action is permanent and will completely empty the search tracking database table. This cannot be undone.', Constants::TEXT_DOMAIN ); ?></p>
-					<form method="post" action="" onsubmit="return confirm('<?php echo esc_attr__( 'Are you absolutely sure you want to permanently delete all search analytics logs?', Constants::TEXT_DOMAIN ); ?>');">
+					<h3 class="destructive"><?php esc_html_e( 'Clear Search Logs', 'search-analytics-insights' ); ?></h3>
+					<p><?php esc_html_e( 'Warning: This action is permanent and will completely empty the search tracking database table. This cannot be undone.', 'search-analytics-insights' ); ?></p>
+					<form method="post" action="" onsubmit="return confirm('<?php echo esc_attr__( 'Are you absolutely sure you want to permanently delete all search analytics logs?', 'search-analytics-insights' ); ?>');">
 						<?php wp_nonce_field( 'sai_tools_action', 'sai_tools_nonce' ); ?>
 						<input type="hidden" name="sai_action" value="clear" />
-						<?php submit_button( __( 'Permanently Delete Logs', Constants::TEXT_DOMAIN ), 'destructive', 'submit_clear', false ); ?>
+						<?php submit_button( __( 'Permanently Delete Logs', 'search-analytics-insights' ), 'destructive', 'submit_clear', false ); ?>
 					</form>
 				</div>
 
 				<!-- Reset Settings Card -->
 				<div class="search-analytics-insights-panel sai-panel card-destructive">
-					<h3 class="destructive"><?php esc_html_e( 'Reset Plugin Settings', Constants::TEXT_DOMAIN ); ?></h3>
-					<p><?php esc_html_e( 'Restore all settings on this plugin back to their factory defaults. This does not delete search logs.', Constants::TEXT_DOMAIN ); ?></p>
-					<form method="post" action="" onsubmit="return confirm('<?php echo esc_attr__( 'Are you sure you want to reset all plugin settings back to defaults?', Constants::TEXT_DOMAIN ); ?>');">
+					<h3 class="destructive"><?php esc_html_e( 'Reset Plugin Settings', 'search-analytics-insights' ); ?></h3>
+					<p><?php esc_html_e( 'Restore all settings on this plugin back to their factory defaults. This does not delete search logs.', 'search-analytics-insights' ); ?></p>
+					<form method="post" action="" onsubmit="return confirm('<?php echo esc_attr__( 'Are you sure you want to reset all plugin settings back to defaults?', 'search-analytics-insights' ); ?>');">
 						<?php wp_nonce_field( 'sai_tools_action', 'sai_tools_nonce' ); ?>
 						<input type="hidden" name="sai_action" value="reset" />
-						<?php submit_button( __( 'Reset Settings to Defaults', Constants::TEXT_DOMAIN ), 'destructive', 'submit_reset', false ); ?>
+						<?php submit_button( __( 'Reset Settings to Defaults', 'search-analytics-insights' ), 'destructive', 'submit_reset', false ); ?>
 					</form>
 				</div>
 			</div>
@@ -464,15 +464,15 @@ final class Dashboard {
 				?>
 			<div class="sai-help-wrapper">
 				<div class="search-analytics-insights-panel sai-panel">
-					<h3><?php esc_html_e( 'Available Shortcodes', Constants::TEXT_DOMAIN ); ?></h3>
-					<p><?php esc_html_e( 'Use the following shortcodes to add search form and search insights blocks to your pages or posts.', Constants::TEXT_DOMAIN ); ?></p>
+					<h3><?php esc_html_e( 'Available Shortcodes', 'search-analytics-insights' ); ?></h3>
+					<p><?php esc_html_e( 'Use the following shortcodes to add search form and search insights blocks to your pages or posts.', 'search-analytics-insights' ); ?></p>
 					<table class="widefat striped search-analytics-insights-shortcodes-table">
 						<thead>
 							<tr>
-								<th><?php esc_html_e( 'Shortcode', Constants::TEXT_DOMAIN ); ?></th>
-								<th><?php esc_html_e( 'Description', Constants::TEXT_DOMAIN ); ?></th>
-								<th><?php esc_html_e( 'Example Usage', Constants::TEXT_DOMAIN ); ?></th>
-								<th><?php esc_html_e( 'Action', Constants::TEXT_DOMAIN ); ?></th>
+								<th><?php esc_html_e( 'Shortcode', 'search-analytics-insights' ); ?></th>
+								<th><?php esc_html_e( 'Description', 'search-analytics-insights' ); ?></th>
+								<th><?php esc_html_e( 'Example Usage', 'search-analytics-insights' ); ?></th>
+								<th><?php esc_html_e( 'Action', 'search-analytics-insights' ); ?></th>
 							</tr>
 						</thead>
 						<tbody>
@@ -487,7 +487,7 @@ final class Dashboard {
 											class="button button-small search-analytics-insights-copy-shortcode"
 											data-copy-shortcode="<?php echo esc_attr( $shortcode['example'] ); ?>"
 										>
-											<?php esc_html_e( 'Copy', Constants::TEXT_DOMAIN ); ?>
+											<?php esc_html_e( 'Copy', 'search-analytics-insights' ); ?>
 										</button>
 									</td>
 								</tr>
@@ -497,29 +497,29 @@ final class Dashboard {
 				</div>
 
 				<div class="search-analytics-insights-panel sai-panel">
-					<h3><?php esc_html_e( 'Widget & Block Usage', Constants::TEXT_DOMAIN ); ?></h3>
+					<h3><?php esc_html_e( 'Widget & Block Usage', 'search-analytics-insights' ); ?></h3>
 					<div class="sai-usage-grid">
 						<div>
-							<h4><?php esc_html_e( 'Gutenberg Block', Constants::TEXT_DOMAIN ); ?></h4>
-							<p><?php esc_html_e( 'Open any post or page editor. Search for the "Search Analytics Search" block in the block library and insert it. You can adjust Open Mode (Dropdown/Modal/Slide Down) and Show Label under the block sidebar panel.', Constants::TEXT_DOMAIN ); ?></p>
+							<h4><?php esc_html_e( 'Gutenberg Block', 'search-analytics-insights' ); ?></h4>
+							<p><?php esc_html_e( 'Open any post or page editor. Search for the "Search Analytics Search" block in the block library and insert it. You can adjust Open Mode (Dropdown/Modal/Slide Down) and Show Label under the block sidebar panel.', 'search-analytics-insights' ); ?></p>
 						</div>
 						<div>
-							<h4><?php esc_html_e( 'WordPress Widget', Constants::TEXT_DOMAIN ); ?></h4>
-							<p><?php esc_html_e( 'Navigate to Appearance > Widgets. Add the "Search Analytics Search Widget" into any sidebar or widget area. You can customize the Widget Title, icon size, toggle Open Mode, and choose whether to display text labels.', Constants::TEXT_DOMAIN ); ?></p>
+							<h4><?php esc_html_e( 'WordPress Widget', 'search-analytics-insights' ); ?></h4>
+							<p><?php esc_html_e( 'Navigate to Appearance > Widgets. Add the "Search Analytics Search Widget" into any sidebar or widget area. You can customize the Widget Title, icon size, toggle Open Mode, and choose whether to display text labels.', 'search-analytics-insights' ); ?></p>
 						</div>
 					</div>
 				</div>
 
 				<div class="search-analytics-insights-panel sai-panel">
-					<h3><?php esc_html_e( 'Frequently Asked Questions', Constants::TEXT_DOMAIN ); ?></h3>
+					<h3><?php esc_html_e( 'Frequently Asked Questions', 'search-analytics-insights' ); ?></h3>
 					<div class="sai-faq-list">
 						<div>
-							<h4><?php esc_html_e( 'Does this track personal user data?', Constants::TEXT_DOMAIN ); ?></h4>
-							<p><?php esc_html_e( 'The plugin is designed to be privacy-friendly. It does not collect raw IP addresses, relying on optional logged-in user IDs and anonymous session IDs to compile search counts.', Constants::TEXT_DOMAIN ); ?></p>
+							<h4><?php esc_html_e( 'Does this track personal user data?', 'search-analytics-insights' ); ?></h4>
+							<p><?php esc_html_e( 'The plugin is designed to be privacy-friendly. It does not collect raw IP addresses, relying on optional logged-in user IDs and anonymous session IDs to compile search counts.', 'search-analytics-insights' ); ?></p>
 						</div>
 						<div>
-							<h4><?php esc_html_e( 'How are search sources managed?', Constants::TEXT_DOMAIN ); ?></h4>
-							<p><?php esc_html_e( 'By default, search indexes pages and posts. You can select specific public post types (e.g. products, events) under the Search Settings tab.', Constants::TEXT_DOMAIN ); ?></p>
+							<h4><?php esc_html_e( 'How are search sources managed?', 'search-analytics-insights' ); ?></h4>
+							<p><?php esc_html_e( 'By default, search indexes pages and posts. You can select specific public post types (e.g. products, events) under the Search Settings tab.', 'search-analytics-insights' ); ?></p>
 						</div>
 					</div>
 				</div>
@@ -539,30 +539,30 @@ final class Dashboard {
 	 */
 	private function render_tabbed_page( string $active_tab, callable $content_renderer ): void {
 		if ( ! current_user_can( Constants::CAPABILITY ) ) {
-			wp_die( esc_html__( 'You do not have permission to access this page.', Constants::TEXT_DOMAIN ) );
+			wp_die( esc_html__( 'You do not have permission to access this page.', 'search-analytics-insights' ) );
 		}
 		?>
-		<div class="wrap search-analytics-insights-wrap search-analytics-insights-admin-wrap" data-copied-label="<?php echo esc_attr__( 'Copied', Constants::TEXT_DOMAIN ); ?>">
+		<div class="wrap search-analytics-insights-wrap search-analytics-insights-admin-wrap" data-copied-label="<?php echo esc_attr__( 'Copied', 'search-analytics-insights' ); ?>">
 			<div class="sai-admin-header">
-				<h1><?php esc_html_e( 'Search Analytics & Insights', Constants::TEXT_DOMAIN ); ?></h1>
-				<p class="sai-admin-header-subtitle"><?php esc_html_e( 'Privacy-first search activity tracking and reporting.', Constants::TEXT_DOMAIN ); ?></p>
+				<h1><?php esc_html_e( 'Search Analytics & Insights', 'search-analytics-insights' ); ?></h1>
+				<p class="sai-admin-header-subtitle"><?php esc_html_e( 'Privacy-first search activity tracking and reporting.', 'search-analytics-insights' ); ?></p>
 			</div>
 			
 			<h2 class="nav-tab-wrapper">
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=search-analytics-insights' ) ); ?>" class="nav-tab <?php echo 'dashboard' === $active_tab ? 'nav-tab-active' : ''; ?>">
-					<span class="dashicons dashicons-dashboard"></span> <?php esc_html_e( 'Dashboard', Constants::TEXT_DOMAIN ); ?>
+					<span class="dashicons dashicons-dashboard"></span> <?php esc_html_e( 'Dashboard', 'search-analytics-insights' ); ?>
 				</a>
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=search-analytics-analytics' ) ); ?>" class="nav-tab <?php echo 'analytics' === $active_tab ? 'nav-tab-active' : ''; ?>">
-					<span class="dashicons dashicons-chart-bar"></span> <?php esc_html_e( 'Analytics & Insights', Constants::TEXT_DOMAIN ); ?>
+					<span class="dashicons dashicons-chart-bar"></span> <?php esc_html_e( 'Analytics & Insights', 'search-analytics-insights' ); ?>
 				</a>
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=search-analytics-settings' ) ); ?>" class="nav-tab <?php echo 'settings' === $active_tab ? 'nav-tab-active' : ''; ?>">
-					<span class="dashicons dashicons-admin-settings"></span> <?php esc_html_e( 'Search Settings', Constants::TEXT_DOMAIN ); ?>
+					<span class="dashicons dashicons-admin-settings"></span> <?php esc_html_e( 'Search Settings', 'search-analytics-insights' ); ?>
 				</a>
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=search-analytics-tools' ) ); ?>" class="nav-tab <?php echo 'tools' === $active_tab ? 'nav-tab-active' : ''; ?>">
-					<span class="dashicons dashicons-admin-tools"></span> <?php esc_html_e( 'Tools', Constants::TEXT_DOMAIN ); ?>
+					<span class="dashicons dashicons-admin-tools"></span> <?php esc_html_e( 'Tools', 'search-analytics-insights' ); ?>
 				</a>
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=search-analytics-help' ) ); ?>" class="nav-tab <?php echo 'help' === $active_tab ? 'nav-tab-active' : ''; ?>">
-					<span class="dashicons dashicons-editor-help"></span> <?php esc_html_e( 'Help & Docs', Constants::TEXT_DOMAIN ); ?>
+					<span class="dashicons dashicons-editor-help"></span> <?php esc_html_e( 'Help & Docs', 'search-analytics-insights' ); ?>
 				</a>
 			</h2>
 			
@@ -603,13 +603,13 @@ final class Dashboard {
 		$user_id = isset( $record['user_id'] ) ? absint( $record['user_id'] ) : 0;
 
 		if ( 0 === $user_id ) {
-			return __( 'Visitor', Constants::TEXT_DOMAIN );
+			return __( 'Visitor', 'search-analytics-insights' );
 		}
 
 		$user = get_userdata( $user_id );
 
 		if ( ! $user || empty( $user->user_login ) ) {
-			return __( 'Visitor', Constants::TEXT_DOMAIN );
+			return __( 'Visitor', 'search-analytics-insights' );
 		}
 
 		return (string) $user->user_login;
@@ -624,17 +624,17 @@ final class Dashboard {
 		return array(
 			array(
 				'tag'         => '[search_insights_form]',
-				'description' => __( 'Displays a search form that automatically uses live AJAX search or native search depending on plugin settings.', Constants::TEXT_DOMAIN ),
+				'description' => __( 'Displays a search form that automatically uses live AJAX search or native search depending on plugin settings.', 'search-analytics-insights' ),
 				'example'     => '[search_insights_form placeholder="Search..." button_text="Search"]',
 			),
 			array(
 				'tag'         => '[search_insights_popular]',
-				'description' => __( 'Displays the most searched terms from the analytics database.', Constants::TEXT_DOMAIN ),
+				'description' => __( 'Displays the most searched terms from the analytics database.', 'search-analytics-insights' ),
 				'example'     => '[search_insights_popular limit="5" show_count="true"]',
 			),
 			array(
 				'tag'         => '[search_insights_trending]',
-				'description' => __( 'Displays trending searches from the last 7 days.', Constants::TEXT_DOMAIN ),
+				'description' => __( 'Displays trending searches from the last 7 days.', 'search-analytics-insights' ),
 				'example'     => '[search_insights_trending limit="5" title="Trending Searches"]',
 			),
 		);

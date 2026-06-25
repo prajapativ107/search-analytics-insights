@@ -36,10 +36,10 @@ final class Privacy {
 
 		$content = sprintf(
 			/* translators: %s: plugin name */
-			__( '%s collects search terms entered into the site search, the date and time of the search, the number of search results returned, the logged-in user ID when available, and a random anonymous session identifier. It does not collect raw IP addresses or user agent strings.', Constants::TEXT_DOMAIN ),
-			esc_html__( 'Search Analytics & Insights', Constants::TEXT_DOMAIN )
+			__( '%s collects search terms entered into the site search, the date and time of the search, the number of search results returned, the logged-in user ID when available, and a random anonymous session identifier. It does not collect raw IP addresses or user agent strings.', 'search-analytics-insights' ),
+			esc_html__( 'Search Analytics & Insights', 'search-analytics-insights' )
 		);
 
-		wp_add_privacy_policy_content( Constants::TEXT_DOMAIN, wp_kses_post( wpautop( $content ) ) );
+		wp_add_privacy_policy_content( 'search-analytics-insights', wp_kses_post( wpautop( $content ) ) );
 	}
 }

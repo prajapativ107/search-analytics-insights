@@ -75,14 +75,14 @@ final class Settings {
 
 		add_settings_section(
 			self::SECTION_SEARCH_FORM,
-			__( 'Search Form', Constants::TEXT_DOMAIN ),
+			__( 'Search Form', 'search-analytics-insights' ),
 			array( $this, 'render_search_form_section_description' ),
 			self::PAGE_SLUG
 		);
 
 		add_settings_field(
 			'placeholder',
-			__( 'Placeholder text', Constants::TEXT_DOMAIN ),
+			__( 'Placeholder text', 'search-analytics-insights' ),
 			array( $this, 'render_placeholder_field' ),
 			self::PAGE_SLUG,
 			self::SECTION_SEARCH_FORM
@@ -90,7 +90,7 @@ final class Settings {
 
 		add_settings_field(
 			'button_text',
-			__( 'Button text', Constants::TEXT_DOMAIN ),
+			__( 'Button text', 'search-analytics-insights' ),
 			array( $this, 'render_button_text_field' ),
 			self::PAGE_SLUG,
 			self::SECTION_SEARCH_FORM
@@ -98,7 +98,7 @@ final class Settings {
 
 		add_settings_field(
 			'show_button',
-			__( 'Show button', Constants::TEXT_DOMAIN ),
+			__( 'Show button', 'search-analytics-insights' ),
 			array( $this, 'render_show_button_field' ),
 			self::PAGE_SLUG,
 			self::SECTION_SEARCH_FORM
@@ -106,7 +106,7 @@ final class Settings {
 
 		add_settings_field(
 			'form_style',
-			__( 'Form style', Constants::TEXT_DOMAIN ),
+			__( 'Form style', 'search-analytics-insights' ),
 			array( $this, 'render_form_style_field' ),
 			self::PAGE_SLUG,
 			self::SECTION_SEARCH_FORM
@@ -114,14 +114,14 @@ final class Settings {
 
 		add_settings_section(
 			self::SECTION_AJAX_SEARCH,
-			__( 'AJAX Search', Constants::TEXT_DOMAIN ),
+			__( 'AJAX Search', 'search-analytics-insights' ),
 			array( $this, 'render_ajax_search_section_description' ),
 			self::PAGE_SLUG
 		);
 
 		add_settings_field(
 			'enabled',
-			__( 'Enable AJAX search', Constants::TEXT_DOMAIN ),
+			__( 'Enable AJAX search', 'search-analytics-insights' ),
 			array( $this, 'render_ajax_enabled_field' ),
 			self::PAGE_SLUG,
 			self::SECTION_AJAX_SEARCH
@@ -129,7 +129,7 @@ final class Settings {
 
 		add_settings_field(
 			'minimum_characters',
-			__( 'Minimum characters', Constants::TEXT_DOMAIN ),
+			__( 'Minimum characters', 'search-analytics-insights' ),
 			array( $this, 'render_minimum_characters_field' ),
 			self::PAGE_SLUG,
 			self::SECTION_AJAX_SEARCH
@@ -137,7 +137,7 @@ final class Settings {
 
 		add_settings_field(
 			'maximum_results',
-			__( 'Maximum results', Constants::TEXT_DOMAIN ),
+			__( 'Maximum results', 'search-analytics-insights' ),
 			array( $this, 'render_maximum_results_field' ),
 			self::PAGE_SLUG,
 			self::SECTION_AJAX_SEARCH
@@ -145,7 +145,7 @@ final class Settings {
 
 		add_settings_field(
 			'debounce_time',
-			__( 'Debounce time', Constants::TEXT_DOMAIN ),
+			__( 'Debounce time', 'search-analytics-insights' ),
 			array( $this, 'render_debounce_time_field' ),
 			self::PAGE_SLUG,
 			self::SECTION_AJAX_SEARCH
@@ -153,14 +153,14 @@ final class Settings {
 
 		add_settings_section(
 			self::SECTION_SEARCH_RESULTS,
-			__( 'Search Results', Constants::TEXT_DOMAIN ),
+			__( 'Search Results', 'search-analytics-insights' ),
 			array( $this, 'render_search_results_section_description' ),
 			self::PAGE_SLUG
 		);
 
 		add_settings_field(
 			'show_featured_images',
-			__( 'Show featured images', Constants::TEXT_DOMAIN ),
+			__( 'Show featured images', 'search-analytics-insights' ),
 			array( $this, 'render_show_featured_images_field' ),
 			self::PAGE_SLUG,
 			self::SECTION_SEARCH_RESULTS
@@ -168,7 +168,7 @@ final class Settings {
 
 		add_settings_field(
 			'show_post_type_label',
-			__( 'Show post type label', Constants::TEXT_DOMAIN ),
+			__( 'Show post type label', 'search-analytics-insights' ),
 			array( $this, 'render_show_post_type_label_field' ),
 			self::PAGE_SLUG,
 			self::SECTION_SEARCH_RESULTS
@@ -176,7 +176,7 @@ final class Settings {
 
 		add_settings_field(
 			'no_results_message',
-			__( 'No results message', Constants::TEXT_DOMAIN ),
+			__( 'No results message', 'search-analytics-insights' ),
 			array( $this, 'render_no_results_message_field' ),
 			self::PAGE_SLUG,
 			self::SECTION_SEARCH_RESULTS
@@ -184,14 +184,14 @@ final class Settings {
 
 		add_settings_section(
 			self::SECTION_SEARCH_SOURCES,
-			__( 'Search Sources', Constants::TEXT_DOMAIN ),
+			__( 'Search Sources', 'search-analytics-insights' ),
 			array( $this, 'render_search_sources_section_description' ),
 			self::PAGE_SLUG
 		);
 
 		add_settings_field(
 			'load_all_public_post_types',
-			__( 'Automatically load all public post types', Constants::TEXT_DOMAIN ),
+			__( 'Automatically load all public post types', 'search-analytics-insights' ),
 			array( $this, 'render_load_all_public_post_types_field' ),
 			self::PAGE_SLUG,
 			self::SECTION_SEARCH_SOURCES
@@ -199,7 +199,7 @@ final class Settings {
 
 		add_settings_field(
 			'searchable_post_types',
-			__( 'Allow selecting searchable post types', Constants::TEXT_DOMAIN ),
+			__( 'Allow selecting searchable post types', 'search-analytics-insights' ),
 			array( $this, 'render_searchable_post_types_field' ),
 			self::PAGE_SLUG,
 			self::SECTION_SEARCH_SOURCES
@@ -207,14 +207,14 @@ final class Settings {
 
 		add_settings_section(
 			self::SECTION_ANALYTICS,
-			__( 'Analytics', Constants::TEXT_DOMAIN ),
+			__( 'Analytics', 'search-analytics-insights' ),
 			array( $this, 'render_analytics_section_description' ),
 			self::PAGE_SLUG
 		);
 
 		add_settings_field(
 			'track_logged_in_users',
-			__( 'Track logged-in users', Constants::TEXT_DOMAIN ),
+			__( 'Track logged-in users', 'search-analytics-insights' ),
 			array( $this, 'render_track_logged_in_users_field' ),
 			self::PAGE_SLUG,
 			self::SECTION_ANALYTICS
@@ -222,7 +222,7 @@ final class Settings {
 
 		add_settings_field(
 			'track_guests',
-			__( 'Track guests', Constants::TEXT_DOMAIN ),
+			__( 'Track guests', 'search-analytics-insights' ),
 			array( $this, 'render_track_guests_field' ),
 			self::PAGE_SLUG,
 			self::SECTION_ANALYTICS
@@ -230,7 +230,7 @@ final class Settings {
 
 		add_settings_field(
 			'search_retention_period',
-			__( 'Search retention period', Constants::TEXT_DOMAIN ),
+			__( 'Search retention period', 'search-analytics-insights' ),
 			array( $this, 'render_search_retention_period_field' ),
 			self::PAGE_SLUG,
 			self::SECTION_ANALYTICS
@@ -243,7 +243,7 @@ final class Settings {
 	 * @return void
 	 */
 	public function render_search_form_section_description(): void {
-		echo '<p>' . esc_html__( 'Set the default search form copy and visual style.', Constants::TEXT_DOMAIN ) . '</p>';
+		echo '<p>' . esc_html__( 'Set the default search form copy and visual style.', 'search-analytics-insights' ) . '</p>';
 	}
 
 	/**
@@ -252,7 +252,7 @@ final class Settings {
 	 * @return void
 	 */
 	public function render_ajax_search_section_description(): void {
-		echo '<p>' . esc_html__( 'Control how quickly live search appears and how many results it returns.', Constants::TEXT_DOMAIN ) . '</p>';
+		echo '<p>' . esc_html__( 'Control how quickly live search appears and how many results it returns.', 'search-analytics-insights' ) . '</p>';
 	}
 
 	/**
@@ -261,7 +261,7 @@ final class Settings {
 	 * @return void
 	 */
 	public function render_search_results_section_description(): void {
-		echo '<p>' . esc_html__( 'Adjust what visitors see in live search result items.', Constants::TEXT_DOMAIN ) . '</p>';
+		echo '<p>' . esc_html__( 'Adjust what visitors see in live search result items.', 'search-analytics-insights' ) . '</p>';
 	}
 
 	/**
@@ -270,7 +270,7 @@ final class Settings {
 	 * @return void
 	 */
 	public function render_search_sources_section_description(): void {
-		echo '<p>' . esc_html__( 'Choose which public content types should be searchable.', Constants::TEXT_DOMAIN ) . '</p>';
+		echo '<p>' . esc_html__( 'Choose which public content types should be searchable.', 'search-analytics-insights' ) . '</p>';
 	}
 
 	/**
@@ -281,7 +281,7 @@ final class Settings {
 	 * @return void
 	 */
 	public function render_analytics_section_description(): void {
-		echo '<p>' . esc_html__( 'Define which searches should be tracked and how long they are retained.', Constants::TEXT_DOMAIN ) . '</p>';
+		echo '<p>' . esc_html__( 'Define which searches should be tracked and how long they are retained.', 'search-analytics-insights' ) . '</p>';
 	}
 
 	/**
@@ -295,7 +295,7 @@ final class Settings {
 			$this->field_id( 'search_form', 'placeholder' ),
 			$this->field_name( 'search_form', 'placeholder' ),
 			(string) $settings['placeholder'],
-			__( 'Text displayed inside the search input before typing.', Constants::TEXT_DOMAIN )
+			__( 'Text displayed inside the search input before typing.', 'search-analytics-insights' )
 		);
 	}
 
@@ -310,7 +310,7 @@ final class Settings {
 			$this->field_id( 'search_form', 'button_text' ),
 			$this->field_name( 'search_form', 'button_text' ),
 			(string) $settings['button_text'],
-			__( 'Label shown on the search submit button.', Constants::TEXT_DOMAIN )
+			__( 'Label shown on the search submit button.', 'search-analytics-insights' )
 		);
 	}
 
@@ -325,7 +325,7 @@ final class Settings {
 			$this->field_id( 'search_form', 'show_button' ),
 			$this->field_name( 'search_form', 'show_button' ),
 			! empty( $settings['show_button'] ),
-			__( 'Show the submit button next to the input.', Constants::TEXT_DOMAIN )
+			__( 'Show the submit button next to the input.', 'search-analytics-insights' )
 		);
 	}
 
@@ -341,11 +341,11 @@ final class Settings {
 			$this->field_name( 'search_form', 'form_style' ),
 			(string) $settings['form_style'],
 			array(
-				'rounded'    => __( 'Rounded', Constants::TEXT_DOMAIN ),
-				'rectangle'  => __( 'Rectangle', Constants::TEXT_DOMAIN ),
-				'underlined' => __( 'Underlined', Constants::TEXT_DOMAIN ),
+				'rounded'    => __( 'Rounded', 'search-analytics-insights' ),
+				'rectangle'  => __( 'Rectangle', 'search-analytics-insights' ),
+				'underlined' => __( 'Underlined', 'search-analytics-insights' ),
 			),
-			__( 'Choose the default visual treatment for the search form.', Constants::TEXT_DOMAIN )
+			__( 'Choose the default visual treatment for the search form.', 'search-analytics-insights' )
 		);
 	}
 
@@ -360,7 +360,7 @@ final class Settings {
 			$this->field_id( 'ajax_search', 'enabled' ),
 			$this->field_name( 'ajax_search', 'enabled' ),
 			! empty( $settings['enabled'] ),
-			__( 'Enable the live AJAX search experience on the front end.', Constants::TEXT_DOMAIN )
+			__( 'Enable the live AJAX search experience on the front end.', 'search-analytics-insights' )
 		);
 	}
 
@@ -377,7 +377,7 @@ final class Settings {
 			(int) $settings['minimum_characters'],
 			1,
 			10,
-			__( 'Search only starts after this many characters are entered.', Constants::TEXT_DOMAIN )
+			__( 'Search only starts after this many characters are entered.', 'search-analytics-insights' )
 		);
 	}
 
@@ -394,7 +394,7 @@ final class Settings {
 			(int) $settings['max_results'],
 			1,
 			20,
-			__( 'Controls how many results the AJAX search returns.', Constants::TEXT_DOMAIN )
+			__( 'Controls how many results the AJAX search returns.', 'search-analytics-insights' )
 		);
 	}
 
@@ -411,7 +411,7 @@ final class Settings {
 			(int) $settings['debounce_time'],
 			50,
 			2000,
-			__( 'Delay in milliseconds before the AJAX request is sent.', Constants::TEXT_DOMAIN )
+			__( 'Delay in milliseconds before the AJAX request is sent.', 'search-analytics-insights' )
 		);
 	}
 
@@ -426,7 +426,7 @@ final class Settings {
 			$this->field_id( 'search_results', 'show_featured_images' ),
 			$this->field_name( 'search_results', 'show_featured_images' ),
 			! empty( $settings['show_featured_images'] ),
-			__( 'Display featured images in live search results.', Constants::TEXT_DOMAIN )
+			__( 'Display featured images in live search results.', 'search-analytics-insights' )
 		);
 	}
 
@@ -441,7 +441,7 @@ final class Settings {
 			$this->field_id( 'search_results', 'show_post_type_label' ),
 			$this->field_name( 'search_results', 'show_post_type_label' ),
 			! empty( $settings['show_post_type_label'] ),
-			__( 'Show the post type label under each result title.', Constants::TEXT_DOMAIN )
+			__( 'Show the post type label under each result title.', 'search-analytics-insights' )
 		);
 	}
 
@@ -456,7 +456,7 @@ final class Settings {
 			$this->field_id( 'search_results', 'no_results_message' ),
 			$this->field_name( 'search_results', 'no_results_message' ),
 			(string) $settings['no_results_message'],
-			__( 'Message shown when a search returns no matches.', Constants::TEXT_DOMAIN )
+			__( 'Message shown when a search returns no matches.', 'search-analytics-insights' )
 		);
 	}
 
@@ -471,7 +471,7 @@ final class Settings {
 			$this->field_id( 'search_sources', 'load_all_public_post_types' ),
 			$this->field_name( 'search_sources', 'load_all_public_post_types' ),
 			! empty( $settings['load_all_public_post_types'] ),
-			__( 'Use every public post type as a searchable source.', Constants::TEXT_DOMAIN )
+			__( 'Use every public post type as a searchable source.', 'search-analytics-insights' )
 		);
 	}
 
@@ -485,7 +485,7 @@ final class Settings {
 		$post_types         = $this->get_public_post_types();
 
 		if ( empty( $post_types ) ) {
-			echo '<p>' . esc_html__( 'No public post types are available.', Constants::TEXT_DOMAIN ) . '</p>';
+			echo '<p>' . esc_html__( 'No public post types are available.', 'search-analytics-insights' ) . '</p>';
 			return;
 		}
 
@@ -522,7 +522,7 @@ final class Settings {
 			$this->field_id( 'analytics', 'track_logged_in_users' ),
 			$this->field_name( 'analytics', 'track_logged_in_users' ),
 			! empty( $settings['track_logged_in_users'] ),
-			__( 'Count search events from signed-in users.', Constants::TEXT_DOMAIN )
+			__( 'Count search events from signed-in users.', 'search-analytics-insights' )
 		);
 	}
 
@@ -537,7 +537,7 @@ final class Settings {
 			$this->field_id( 'analytics', 'track_guests' ),
 			$this->field_name( 'analytics', 'track_guests' ),
 			! empty( $settings['track_guests'] ),
-			__( 'Count search events from anonymous visitors.', Constants::TEXT_DOMAIN )
+			__( 'Count search events from anonymous visitors.', 'search-analytics-insights' )
 		);
 	}
 
@@ -554,7 +554,7 @@ final class Settings {
 			(int) $settings['search_retention_period'],
 			1,
 			3650,
-			__( 'Number of days to keep search records before cleanup.', Constants::TEXT_DOMAIN )
+			__( 'Number of days to keep search records before cleanup.', 'search-analytics-insights' )
 		);
 	}
 

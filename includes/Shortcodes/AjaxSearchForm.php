@@ -86,14 +86,14 @@ final class AjaxSearchForm {
 			data-limit="<?php echo esc_attr( (string) $limit ); ?>"
 			data-show-featured-images="<?php echo esc_attr( $show_images ? '1' : '0' ); ?>"
 			data-show-post-type-label="<?php echo esc_attr( $this->settings->get_show_post_type_label() ? '1' : '0' ); ?>"
-			data-loading-text="<?php echo esc_attr__( 'Searching...', Constants::TEXT_DOMAIN ); ?>"
+			data-loading-text="<?php echo esc_attr__( 'Searching...', 'search-analytics-insights' ); ?>"
 			data-empty-text="<?php echo esc_attr( $this->settings->get_no_results_message() ); ?>"
-			data-min-chars-text="<?php echo esc_attr( sprintf( __( 'Type at least %d characters to search.', Constants::TEXT_DOMAIN ), (int) $settings['minimum_characters'] ) ); ?>"
-			data-error-text="<?php echo esc_attr__( 'Unable to search right now.', Constants::TEXT_DOMAIN ); ?>"
+			data-min-chars-text="<?php echo esc_attr( sprintf( __( 'Type at least %d characters to search.', 'search-analytics-insights' ), (int) $settings['minimum_characters'] ) ); ?>"
+			data-error-text="<?php echo esc_attr__( 'Unable to search right now.', 'search-analytics-insights' ); ?>"
 		>
 			<form class="search-analytics-insights-ajax-search-form" role="search" method="get" action="<?php echo esc_url( home_url( '/' ) ); ?>" novalidate>
 				<label class="screen-reader-text" for="search-analytics-insights-ajax-search-input">
-					<?php esc_html_e( 'Search for:', Constants::TEXT_DOMAIN ); ?>
+					<?php esc_html_e( 'Search for:', 'search-analytics-insights' ); ?>
 				</label>
 				<div class="search-analytics-insights-ajax-search-fields<?php echo $is_ajax_enabled ? ' search-analytics-insights-ajax-search-fields--no-button search-analytics-insights-ajax-search-fields--has-icon' : ''; ?>">
 					<input

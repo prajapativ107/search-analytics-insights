@@ -64,7 +64,7 @@ final class SearchForm {
 		?>
 		<form role="search" method="get" class="search-form search-analytics-insights-form search-analytics-insights-form--<?php echo esc_attr( $form_style ); ?>" action="<?php echo esc_url( $action_url ); ?>">
 			<label for="<?php echo esc_attr( $field_id ); ?>" class="screen-reader-text">
-				<?php esc_html_e( 'Search for:', Constants::TEXT_DOMAIN ); ?>
+				<?php esc_html_e( 'Search for:', 'search-analytics-insights' ); ?>
 			</label>
 			<div class="search-analytics-insights-form-fields search-analytics-insights-form-fields--<?php echo esc_attr( $show_button ? 'with-button' : 'no-button' ); ?><?php echo $is_ajax_enabled ? ' search-analytics-insights-form-fields--has-icon' : ''; ?>">
 				<input

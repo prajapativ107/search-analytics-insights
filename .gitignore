@@ -27,3 +27,7 @@
 
 # Coverage
 coverage/
+
+# Languages
+/languages/
+/search-analytics-insights.pot
