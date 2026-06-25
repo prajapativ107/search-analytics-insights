@@ -1,3 +1,4 @@
+
 # macOS
 .DS_Store
 
@@ -31,3 +32,8 @@ coverage/
 # Languages
 /languages/
 /search-analytics-insights.pot
+
+#git
+.github/
+.gitignore
+/docs/
