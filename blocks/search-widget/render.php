@@ -53,7 +53,7 @@ defined( 'ABSPATH' ) || exit;
 	wp_enqueue_script(
 		'search-analytics-insights-block-search-widget',
 		SEARCH_ANALYTICS_INSIGHTS_URL . 'assets/js/search-widget.js',
-		array( 'wp-blocks', 'wp-element', 'wp-components', 'wp-i18n', 'wp-block-editor', 'wp-compose', 'wp-data' ),
+		array( 'wp-blocks', 'wp-element', 'wp-components', 'wp-i18n', 'wp-block-editor', 'wp-compose', 'wp-data', 'search-analytics-insights-frontend' ),
 		Constants::VERSION,
 		true
 	);

@@ -99,6 +99,42 @@ final class AnalyticsService {
 	}
 
 	/**
+	 * Get the top search pages by title.
+	 *
+	 * @param array<string, mixed> $filters Query filters.
+	 * @param int                  $limit   Result limit.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function get_top_pages_by_title( array $filters = array(), int $limit = 10 ): array {
+		return $this->repository->get_top_pages_by_title( $filters, $limit );
+	}
+
+	/**
+	 * Get the top search pages by URL.
+	 *
+	 * @param array<string, mixed> $filters Query filters.
+	 * @param int                  $limit   Result limit.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function get_top_pages_by_url( array $filters = array(), int $limit = 10 ): array {
+		return $this->repository->get_top_pages_by_url( $filters, $limit );
+	}
+
+	/**
+	 * Get search count grouped by page type.
+	 *
+	 * @param array<string, mixed> $filters Query filters.
+	 * @param int                  $limit   Result limit.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function get_searches_by_page_type( array $filters = array(), int $limit = 10 ): array {
+		return $this->repository->get_searches_by_page_type( $filters, $limit );
+	}
+
+	/**
 	 * Delete all logged search records.
 	 *
 	 * @return bool

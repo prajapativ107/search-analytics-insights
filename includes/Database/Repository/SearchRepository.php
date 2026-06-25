@@ -35,13 +35,17 @@ final class SearchRepository {
 			'user_id'            => isset( $event['user_id'] ) ? absint( $event['user_id'] ) : null,
 			'session_id'         => isset( $event['session_id'] ) ? sanitize_text_field( (string) $event['session_id'] ) : null,
 			'blog_id'            => isset( $event['blog_id'] ) ? absint( $event['blog_id'] ) : get_current_blog_id(),
+			'page_title'         => isset( $event['page_title'] ) ? sanitize_text_field( (string) $event['page_title'] ) : '',
+			'page_url'           => isset( $event['page_url'] ) ? esc_url_raw( (string) $event['page_url'] ) : '',
+			'referrer'           => isset( $event['referrer'] ) ? esc_url_raw( (string) $event['referrer'] ) : '',
+			'page_type'          => isset( $event['page_type'] ) ? sanitize_text_field( (string) $event['page_type'] ) : '',
 		);
 
 		if ( '' === $data['search_term_hash'] ) {
 			$data['search_term_hash'] = hash( 'sha256', mb_strtolower( $data['search_term'] ) );
 		}
 
-		$format   = array( '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%s', '%d' );
+		$format   = array( '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%s', '%d', '%s', '%s', '%s', '%s' );
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
 		$inserted = $wpdb->insert( Constants::table_name(), $data, $format );
 
@@ -99,7 +103,7 @@ final class SearchRepository {
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$grouped_sql = "SELECT search_term, user_id, COUNT(*) AS search_count, MAX(searched_at) AS last_searched, MAX(id) AS latest_id FROM {$table} {$where['clause']} GROUP BY search_term, user_id";
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$list_sql    = "SELECT grouped.search_term, grouped.user_id, grouped.search_count, grouped.last_searched, latest.result_count FROM ( {$grouped_sql} ) AS grouped INNER JOIN {$table} AS latest ON latest.id = grouped.latest_id ORDER BY grouped.last_searched DESC, grouped.search_term ASC, grouped.user_id ASC LIMIT %d OFFSET %d";
+		$list_sql    = "SELECT grouped.search_term, grouped.user_id, grouped.search_count, grouped.last_searched, latest.result_count, latest.page_title, latest.page_url, latest.referrer, latest.page_type FROM ( {$grouped_sql} ) AS grouped INNER JOIN {$table} AS latest ON latest.id = grouped.latest_id ORDER BY grouped.last_searched DESC, grouped.search_term ASC, grouped.user_id ASC LIMIT %d OFFSET %d";
 
 		$params   = $where['params'];
 		$params[] = $per_page;
@@ -139,7 +143,7 @@ final class SearchRepository {
 		$where = $this->build_where_clause( $filters );
 		$table = esc_sql( Constants::table_name() );
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$sql   = "SELECT id, search_term, searched_at, source, matched_post_types, result_count, user_id, session_id FROM {$table} {$where['clause']} ORDER BY searched_at DESC, id DESC LIMIT %d";
+		$sql   = "SELECT id, search_term, searched_at, source, matched_post_types, result_count, user_id, session_id, page_title, page_url, referrer, page_type FROM {$table} {$where['clause']} ORDER BY searched_at DESC, id DESC LIMIT %d";
 
 		$params   = $where['params'];
 		$params[] = $limit;
@@ -216,7 +220,7 @@ final class SearchRepository {
 		$table    = esc_sql( Constants::table_name() );
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$sql      = "SELECT id, search_term, searched_at, source, matched_post_types, result_count, user_id, session_id, blog_id FROM {$table} {$where['clause']} ORDER BY searched_at DESC, id DESC LIMIT %d OFFSET %d";
+		$sql      = "SELECT id, search_term, searched_at, source, matched_post_types, result_count, user_id, session_id, blog_id, page_title, page_url, referrer, page_type FROM {$table} {$where['clause']} ORDER BY searched_at DESC, id DESC LIMIT %d OFFSET %d";
 		$params   = $where['params'];
 		$params[] = $per_page;
 		$params[] = $offset;
@@ -341,6 +345,81 @@ final class SearchRepository {
 	}
 
 	/**
+	 * Get the top search pages by title.
+	 *
+	 * @param array<string, mixed> $filters Query filters.
+	 * @param int                  $limit   Result limit.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function get_top_pages_by_title( array $filters = array(), int $limit = 10 ): array {
+		global $wpdb;
+
+		$where    = $this->build_where_clause( $filters );
+		$limit    = max( 1, absint( $limit ) );
+		$table    = esc_sql( Constants::table_name() );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$sql      = "SELECT page_title, page_url, COUNT(*) AS search_count FROM {$table} {$where['clause']} GROUP BY page_title, page_url ORDER BY search_count DESC, page_title ASC LIMIT {$limit}";
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$prepared = $where['params'] ? $wpdb->prepare( $sql, $where['params'] ) : $sql;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.NotPrepared
+		$results = $wpdb->get_results( $prepared, ARRAY_A );
+
+		return is_array( $results ) ? $results : array();
+	}
+
+	/**
+	 * Get the top search pages by URL.
+	 *
+	 * @param array<string, mixed> $filters Query filters.
+	 * @param int                  $limit   Result limit.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function get_top_pages_by_url( array $filters = array(), int $limit = 10 ): array {
+		global $wpdb;
+
+		$where    = $this->build_where_clause( $filters );
+		$limit    = max( 1, absint( $limit ) );
+		$table    = esc_sql( Constants::table_name() );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$sql      = "SELECT page_url, COUNT(*) AS search_count FROM {$table} {$where['clause']} GROUP BY page_url ORDER BY search_count DESC, page_url ASC LIMIT {$limit}";
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$prepared = $where['params'] ? $wpdb->prepare( $sql, $where['params'] ) : $sql;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.NotPrepared
+		$results = $wpdb->get_results( $prepared, ARRAY_A );
+
+		return is_array( $results ) ? $results : array();
+	}
+
+	/**
+	 * Get search count grouped by page type.
+	 *
+	 * @param array<string, mixed> $filters Query filters.
+	 * @param int                  $limit   Result limit.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function get_searches_by_page_type( array $filters = array(), int $limit = 10 ): array {
+		global $wpdb;
+
+		$where    = $this->build_where_clause( $filters );
+		$limit    = max( 1, absint( $limit ) );
+		$table    = esc_sql( Constants::table_name() );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$sql      = "SELECT page_type, COUNT(*) AS search_count FROM {$table} {$where['clause']} GROUP BY page_type ORDER BY search_count DESC, page_type ASC LIMIT {$limit}";
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$prepared = $where['params'] ? $wpdb->prepare( $sql, $where['params'] ) : $sql;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.NotPrepared
+		$results = $wpdb->get_results( $prepared, ARRAY_A );
+
+		return is_array( $results ) ? $results : array();
+	}
+
+	/**
 	 * Build the SQL where clause and parameters.
 	 *
 	 * @param array<string, mixed> $filters Query filters.
@@ -378,6 +457,21 @@ final class SearchRepository {
 
 		if ( ! empty( $filters['no_results'] ) ) {
 			$clauses[] = 'result_count = 0';
+		}
+
+		if ( ! empty( $filters['page_type'] ) ) {
+			$clauses[] = 'page_type = %s';
+			$params[]  = sanitize_text_field( (string) $filters['page_type'] );
+		}
+
+		if ( ! empty( $filters['page_title'] ) ) {
+			$clauses[] = 'page_title LIKE %s';
+			$params[]  = '%' . sanitize_text_field( (string) $filters['page_title'] ) . '%';
+		}
+
+		if ( ! empty( $filters['page_url'] ) ) {
+			$clauses[] = 'page_url LIKE %s';
+			$params[]  = '%' . sanitize_text_field( (string) $filters['page_url'] ) . '%';
 		}
 
 		return array(

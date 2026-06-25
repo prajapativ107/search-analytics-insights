@@ -242,6 +242,14 @@
 		params.append( 'term', term );
 		params.append( 'limit', limit );
 
+		const getPageType = window.SearchAnalyticsInsights && window.SearchAnalyticsInsights.getPageType 
+			? window.SearchAnalyticsInsights.getPageType 
+			: function() { return 'Other'; };
+		params.append( 'page_title', document.title );
+		params.append( 'page_url', window.location.href );
+		params.append( 'referrer', document.referrer );
+		params.append( 'page_type', getPageType() );
+
 		fetch(
 			ajaxUrl,
 			{

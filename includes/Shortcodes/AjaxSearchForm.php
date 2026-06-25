@@ -69,7 +69,7 @@ final class AjaxSearchForm {
 		wp_enqueue_script(
 			'search-analytics-insights-ajax-search',
 			SEARCH_ANALYTICS_INSIGHTS_URL . 'assets/js/ajax-search.js',
-			array(),
+			array( 'search-analytics-insights-frontend' ),
 			Constants::VERSION,
 			true
 		);

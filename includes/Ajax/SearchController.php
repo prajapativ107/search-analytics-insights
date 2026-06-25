@@ -73,11 +73,22 @@ final class SearchController {
 			);
 		}
 
+		$page_title = isset( $_POST['page_title'] ) ? sanitize_text_field( wp_unslash( (string) $_POST['page_title'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$page_url   = isset( $_POST['page_url'] ) ? esc_url_raw( wp_unslash( (string) $_POST['page_url'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$referrer   = isset( $_POST['referrer'] ) ? esc_url_raw( wp_unslash( (string) $_POST['referrer'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$page_type  = isset( $_POST['page_type'] ) ? sanitize_text_field( wp_unslash( (string) $_POST['page_type'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+
 		$results = $this->search_service->search( $search_term, $this->search_service->get_max_results() );
 		$this->search_tracker->record_search(
 			$search_term,
 			(int) $results['total'],
-			isset( $results['matched_post_types'] ) && is_array( $results['matched_post_types'] ) ? $results['matched_post_types'] : array()
+			isset( $results['matched_post_types'] ) && is_array( $results['matched_post_types'] ) ? $results['matched_post_types'] : array(),
+			array(
+				'page_title' => $page_title,
+				'page_url'   => $page_url,
+				'referrer'   => $referrer,
+				'page_type'  => $page_type,
+			)
 		);
 
 		wp_send_json_success(

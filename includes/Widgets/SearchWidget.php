@@ -77,7 +77,7 @@ final class SearchWidget extends \WP_Widget {
 		wp_enqueue_script(
 			'search-analytics-insights-search-widget',
 			SEARCH_ANALYTICS_INSIGHTS_URL . 'assets/js/search-widget.js',
-			array(),
+			array( 'search-analytics-insights-frontend' ),
 			Constants::VERSION,
 			true
 		);

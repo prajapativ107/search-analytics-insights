@@ -39,6 +39,10 @@ final class Schema {
 			user_id bigint(20) unsigned NULL DEFAULT NULL,
 			session_id char(64) NULL DEFAULT NULL,
 			blog_id bigint(20) unsigned NOT NULL DEFAULT 1,
+			page_title varchar(255) NULL DEFAULT NULL,
+			page_url text NULL DEFAULT NULL,
+			referrer text NULL DEFAULT NULL,
+			page_type varchar(50) NULL DEFAULT NULL,
 			created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			PRIMARY KEY  (id),
 			KEY search_term (search_term),
@@ -48,7 +52,8 @@ final class Schema {
 			KEY searched_at (searched_at),
 			KEY user_id (user_id),
 			KEY session_id (session_id),
-			KEY blog_id (blog_id)
+			KEY blog_id (blog_id),
+			KEY page_type (page_type)
 		) {$charset_collate};";
 
 		dbDelta( $sql );

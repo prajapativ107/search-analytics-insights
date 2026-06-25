@@ -170,6 +170,10 @@ final class Menu {
 				__( 'Result Count', 'search-analytics-insights' ),
 				__( 'User ID', 'search-analytics-insights' ),
 				__( 'Session ID', 'search-analytics-insights' ),
+				__( 'Page Title', 'search-analytics-insights' ),
+				__( 'Page URL', 'search-analytics-insights' ),
+				__( 'Referrer', 'search-analytics-insights' ),
+				__( 'Page Type', 'search-analytics-insights' ),
 			)
 		);
 
@@ -180,7 +184,7 @@ final class Menu {
 
 		while ( true ) {
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$query = "SELECT id, search_term, searched_at, source, matched_post_types, result_count, user_id, session_id FROM {$table} ORDER BY id ASC LIMIT %d OFFSET %d";
+			$query = "SELECT id, search_term, searched_at, source, matched_post_types, result_count, user_id, session_id, page_title, page_url, referrer, page_type FROM {$table} ORDER BY id ASC LIMIT %d OFFSET %d";
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
 			$rows  = $wpdb->get_results( $wpdb->prepare( $query, $limit, $offset ), ARRAY_A );
 
@@ -200,6 +204,10 @@ final class Menu {
 						$row['result_count'],
 						$row['user_id'] ? $row['user_id'] : '',
 						$row['session_id'],
+						$row['page_title'],
+						$row['page_url'],
+						$row['referrer'],
+						$row['page_type'],
 					)
 				);
 			}

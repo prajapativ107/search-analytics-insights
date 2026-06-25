@@ -38,6 +38,22 @@ final class Tracker {
 	public function register_hooks(): void {
 		add_action( 'init', array( $this, 'maybe_issue_session_cookie' ) );
 		add_action( 'wp', array( $this, 'track_search' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_frontend_scripts' ) );
+	}
+
+	/**
+	 * Enqueue frontend script to capture search context page data.
+	 *
+	 * @return void
+	 */
+	public function enqueue_frontend_scripts(): void {
+		wp_enqueue_script(
+			'search-analytics-insights-frontend',
+			SEARCH_ANALYTICS_INSIGHTS_URL . 'assets/js/frontend.js',
+			array(),
+			Constants::VERSION,
+			true
+		);
 	}
 
 	/**
@@ -101,6 +117,10 @@ final class Tracker {
 				'user_id'      => get_current_user_id() ? absint( get_current_user_id() ) : null,
 				'session_id'   => $this->get_session_id(),
 				'blog_id'      => get_current_blog_id(),
+				'page_title'   => isset( $_GET['sai_page_title'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['sai_page_title'] ) ) : '', // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				'page_url'     => isset( $_GET['sai_page_url'] ) ? esc_url_raw( wp_unslash( (string) $_GET['sai_page_url'] ) ) : '', // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				'referrer'     => isset( $_GET['sai_referrer'] ) ? esc_url_raw( wp_unslash( (string) $_GET['sai_referrer'] ) ) : ( isset( $_SERVER['HTTP_REFERER'] ) ? esc_url_raw( wp_unslash( (string) $_SERVER['HTTP_REFERER'] ) ) : '' ), // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+				'page_type'    => isset( $_GET['sai_page_type'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['sai_page_type'] ) ) : '', // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			)
 		);
 	}

@@ -36,7 +36,7 @@ final class SearchTracker {
 	 *
 	 * @return int|false
 	 */
-	public function record_search( string $search_term, int $result_count, array $matched_post_types = array() ) {
+	public function record_search( string $search_term, int $result_count, array $matched_post_types = array(), array $page_data = array() ) {
 		$search_term        = sanitize_text_field( $search_term );
 		$matched_post_types = array_values(
 			array_unique(
@@ -63,6 +63,10 @@ final class SearchTracker {
 				'user_id'            => get_current_user_id() ? absint( get_current_user_id() ) : null,
 				'session_id'         => $this->get_session_id(),
 				'blog_id'            => get_current_blog_id(),
+				'page_title'         => $page_data['page_title'] ?? '',
+				'page_url'           => $page_data['page_url'] ?? '',
+				'referrer'           => $page_data['referrer'] ?? '',
+				'page_type'          => $page_data['page_type'] ?? '',
 			)
 		);
 	}

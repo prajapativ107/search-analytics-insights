@@ -35,6 +35,31 @@
 				syncSearchablePostTypes();
 			}
 
+			// Bind details row click toggler logic using event delegation.
+			wrapper.addEventListener(
+				'click',
+				function (e) {
+					const toggleBtn = e.target.closest( '.sai-toggle-details' );
+					if ( ! toggleBtn) {
+						return;
+					}
+
+					e.preventDefault();
+					const targetId = toggleBtn.getAttribute( 'data-target' );
+					const targetRow = document.getElementById( targetId );
+
+					if (targetRow) {
+						if (targetRow.style.display === 'none') {
+							targetRow.style.display = '';
+							toggleBtn.textContent = toggleBtn.getAttribute( 'data-hide-label' ) || 'Hide';
+						} else {
+							targetRow.style.display = 'none';
+							toggleBtn.textContent = toggleBtn.getAttribute( 'data-show-label' ) || 'Details';
+						}
+					}
+				}
+			);
+
 			if ( ! buttons.length) {
 				return;
 			}

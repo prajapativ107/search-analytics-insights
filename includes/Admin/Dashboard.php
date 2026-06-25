@@ -109,18 +109,30 @@ final class Dashboard {
 									<th><?php esc_html_e( 'Term', 'search-analytics-insights' ); ?></th>
 									<th><?php esc_html_e( 'Date', 'search-analytics-insights' ); ?></th>
 									<th><?php esc_html_e( 'Results', 'search-analytics-insights' ); ?></th>
+									<th><?php esc_html_e( 'From', 'search-analytics-insights' ); ?></th>
+									<th><?php esc_html_e( 'Actions', 'search-analytics-insights' ); ?></th>
 								</tr>
 							</thead>
 							<tbody>
 								<?php if ( empty( $recent_activity ) ) : ?>
-									<tr><td colspan="3"><?php esc_html_e( 'No search activity found.', 'search-analytics-insights' ); ?></td></tr>
+									<tr><td colspan="5"><?php esc_html_e( 'No search activity found.', 'search-analytics-insights' ); ?></td></tr>
 								<?php else : ?>
 									<?php foreach ( $recent_activity as $record ) : ?>
 										<tr>
 											<td><?php echo esc_html( (string) $record['search_term'] ); ?></td>
 											<td><span class="description"><?php echo esc_html( (string) $record['searched_at'] ); ?></span></td>
 											<td><span class="badge <?php echo $record['result_count'] > 0 ? 'badge-success' : 'badge-danger'; ?>"><?php echo esc_html( (string) $record['result_count'] ); ?></span></td>
+											<td><?php $this->render_page_column( $record ); ?></td>
+											<td>
+												<?php
+												$record_id = ! empty( $record['id'] ) ? (string) $record['id'] : md5( (string) $record['search_term'] . '-' . (string) $record['searched_at'] );
+												?>
+												<button type="button" class="button button-small sai-toggle-details" data-target="sai-details-<?php echo esc_attr( $record_id ); ?>" data-show-label="<?php echo esc_attr__( 'Details', 'search-analytics-insights' ); ?>" data-hide-label="<?php echo esc_attr__( 'Hide', 'search-analytics-insights' ); ?>">
+													<?php esc_html_e( 'Details', 'search-analytics-insights' ); ?>
+												</button>
+											</td>
 										</tr>
+										<?php $this->render_details_row( $record, 5 ); ?>
 									<?php endforeach; ?>
 								<?php endif; ?>
 							</tbody>
@@ -152,13 +164,16 @@ final class Dashboard {
 		$no_result_filters['no_results'] = 1;
 		$no_result_terms                 = $this->analytics_service->get_top_search_terms( $no_result_filters, $filters['per_page'] );
 		$daily_counts                    = $this->analytics_service->get_searches_per_day( $filters );
+		$top_pages_by_title              = $this->analytics_service->get_top_pages_by_title( $filters, 10 );
+		$top_pages_by_url                = $this->analytics_service->get_top_pages_by_url( $filters, 10 );
+		$searches_by_page_type           = $this->analytics_service->get_searches_by_page_type( $filters, 10 );
 
 		$total_pages = max( 1, (int) ceil( $aggregated_activity['total'] / $filters['per_page'] ) );
 		$page        = min( $filters['page'], $total_pages );
 
 		$this->render_tabbed_page(
 			'analytics',
-			function () use ( $filters, $summary, $aggregated_activity, $recent_activity, $top_terms, $no_result_terms, $daily_counts, $total_pages, $page ) {
+			function () use ( $filters, $summary, $aggregated_activity, $recent_activity, $top_terms, $no_result_terms, $daily_counts, $total_pages, $page, $top_pages_by_title, $top_pages_by_url, $searches_by_page_type ) {
 				?>
 			<form method="get" class="search-analytics-insights-filters">
 				<input type="hidden" name="page" value="search-analytics-analytics" />
@@ -171,6 +186,36 @@ final class Dashboard {
 
 					<label for="search-analytics-insights-term"><?php esc_html_e( 'Search term', 'search-analytics-insights' ); ?></label>
 					<input id="search-analytics-insights-term" type="search" name="search_term" value="<?php echo esc_attr( $filters['search_term'] ); ?>" />
+
+					<label for="search-analytics-insights-page-type"><?php esc_html_e( 'Page Type', 'search-analytics-insights' ); ?></label>
+					<select id="search-analytics-insights-page-type" name="page_type">
+						<option value=""><?php esc_html_e( 'All Page Types', 'search-analytics-insights' ); ?></option>
+						<?php
+						$page_types = array(
+							'Home',
+							'Page',
+							'Post',
+							'Product',
+							'Shop',
+							'Archive',
+							'Category',
+							'Tag',
+							'Search Results',
+							'Author',
+							'404',
+							'Other',
+						);
+						foreach ( $page_types as $type ) :
+							?>
+							<option value="<?php echo esc_attr( $type ); ?>" <?php selected( $filters['page_type'], $type ); ?>><?php echo esc_html( $type ); ?></option>
+						<?php endforeach; ?>
+					</select>
+
+					<label for="search-analytics-insights-page-title"><?php esc_html_e( 'Page Title', 'search-analytics-insights' ); ?></label>
+					<input id="search-analytics-insights-page-title" type="search" name="page_title" value="<?php echo esc_attr( $filters['page_title'] ); ?>" placeholder="<?php esc_attr_e( 'Search page title...', 'search-analytics-insights' ); ?>" />
+
+					<label for="search-analytics-insights-page-url"><?php esc_html_e( 'Page URL', 'search-analytics-insights' ); ?></label>
+					<input id="search-analytics-insights-page-url" type="search" name="page_url" value="<?php echo esc_attr( $filters['page_url'] ); ?>" placeholder="<?php esc_attr_e( 'Search page URL...', 'search-analytics-insights' ); ?>" />
 
 					<label for="search-analytics-insights-no-results">
 						<input id="search-analytics-insights-no-results" type="checkbox" name="no_results" value="1" <?php checked( 1, (int) $filters['no_results'] ); ?> />
@@ -266,6 +311,94 @@ final class Dashboard {
 						</tbody>
 					</table>
 				</div>
+
+				<div class="search-analytics-insights-panel">
+					<h2><?php esc_html_e( 'Top Pages Where Users Search', 'search-analytics-insights' ); ?></h2>
+					<table class="widefat striped">
+						<thead>
+							<tr>
+								<th><?php esc_html_e( 'Page Title', 'search-analytics-insights' ); ?></th>
+								<th><?php esc_html_e( 'Searches', 'search-analytics-insights' ); ?></th>
+							</tr>
+						</thead>
+						<tbody>
+							<?php if ( empty( $top_pages_by_title ) ) : ?>
+								<tr><td colspan="2"><?php esc_html_e( 'No searches recorded by page title yet.', 'search-analytics-insights' ); ?></td></tr>
+							<?php else : ?>
+								<?php foreach ( $top_pages_by_title as $row ) : ?>
+									<tr>
+										<td>
+											<strong><?php echo esc_html( ! empty( $row['page_title'] ) ? $row['page_title'] : __( 'Untitled Page', 'search-analytics-insights' ) ); ?></strong>
+											<?php if ( ! empty( $row['page_url'] ) ) : ?>
+												<br />
+												<a href="<?php echo esc_url( $row['page_url'] ); ?>" target="_blank" class="description" style="font-size: 0.85em; word-break: break-all; color: var(--sai-muted);">
+													<?php echo esc_html( wp_parse_url( $row['page_url'], PHP_URL_PATH ) ); ?>
+												</a>
+											<?php endif; ?>
+										</td>
+										<td><?php echo esc_html( (string) $row['search_count'] ); ?></td>
+									</tr>
+								<?php endforeach; ?>
+							<?php endif; ?>
+						</tbody>
+					</table>
+				</div>
+
+				<div class="search-analytics-insights-panel">
+					<h2><?php esc_html_e( 'Most Active Search Pages', 'search-analytics-insights' ); ?></h2>
+					<table class="widefat striped">
+						<thead>
+							<tr>
+								<th><?php esc_html_e( 'Page URL', 'search-analytics-insights' ); ?></th>
+								<th><?php esc_html_e( 'Searches', 'search-analytics-insights' ); ?></th>
+							</tr>
+						</thead>
+						<tbody>
+							<?php if ( empty( $top_pages_by_url ) ) : ?>
+								<tr><td colspan="2"><?php esc_html_e( 'No searches recorded by URL yet.', 'search-analytics-insights' ); ?></td></tr>
+							<?php else : ?>
+								<?php foreach ( $top_pages_by_url as $row ) : ?>
+									<tr>
+										<td>
+											<a href="<?php echo esc_url( $row['page_url'] ); ?>" target="_blank" style="word-break: break-all;">
+												<?php echo esc_html( $row['page_url'] ); ?>
+											</a>
+										</td>
+										<td><?php echo esc_html( (string) $row['search_count'] ); ?></td>
+									</tr>
+								<?php endforeach; ?>
+							<?php endif; ?>
+						</tbody>
+					</table>
+				</div>
+
+				<div class="search-analytics-insights-panel">
+					<h2><?php esc_html_e( 'Searches by Page Type', 'search-analytics-insights' ); ?></h2>
+					<table class="widefat striped">
+						<thead>
+							<tr>
+								<th><?php esc_html_e( 'Page Type', 'search-analytics-insights' ); ?></th>
+								<th><?php esc_html_e( 'Searches', 'search-analytics-insights' ); ?></th>
+							</tr>
+						</thead>
+						<tbody>
+							<?php if ( empty( $searches_by_page_type ) ) : ?>
+								<tr><td colspan="2"><?php esc_html_e( 'No searches by page type recorded yet.', 'search-analytics-insights' ); ?></td></tr>
+							<?php else : ?>
+								<?php foreach ( $searches_by_page_type as $row ) : ?>
+									<tr>
+										<td>
+											<span class="sai-page-type-badge" style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; background-color: var(--sai-accent-soft); color: var(--sai-accent);">
+												<?php echo esc_html( ! empty( $row['page_type'] ) ? $row['page_type'] : __( 'Other / Unknown', 'search-analytics-insights' ) ); ?>
+											</span>
+										</td>
+										<td><?php echo esc_html( (string) $row['search_count'] ); ?></td>
+									</tr>
+								<?php endforeach; ?>
+							<?php endif; ?>
+						</tbody>
+					</table>
+				</div>
 			</div>
 
 			<div class="search-analytics-insights-panel search-analytics-insights-table-panel">
@@ -278,12 +411,14 @@ final class Dashboard {
 							<th><?php esc_html_e( 'Search Count', 'search-analytics-insights' ); ?></th>
 							<th><?php esc_html_e( 'Last Searched', 'search-analytics-insights' ); ?></th>
 							<th><?php esc_html_e( 'Results', 'search-analytics-insights' ); ?></th>
+							<th><?php esc_html_e( 'From', 'search-analytics-insights' ); ?></th>
 							<th><?php esc_html_e( 'User', 'search-analytics-insights' ); ?></th>
+							<th><?php esc_html_e( 'Actions', 'search-analytics-insights' ); ?></th>
 						</tr>
 					</thead>
 					<tbody>
 						<?php if ( empty( $aggregated_activity['items'] ) ) : ?>
-							<tr><td colspan="5"><?php esc_html_e( 'No search records found.', 'search-analytics-insights' ); ?></td></tr>
+							<tr><td colspan="7"><?php esc_html_e( 'No search records found.', 'search-analytics-insights' ); ?></td></tr>
 						<?php else : ?>
 							<?php foreach ( $aggregated_activity['items'] as $record ) : ?>
 								<tr>
@@ -291,8 +426,18 @@ final class Dashboard {
 									<td><?php echo esc_html( (string) $record['search_count'] ); ?></td>
 									<td><?php echo esc_html( (string) $record['last_searched'] ); ?></td>
 									<td><?php echo esc_html( (string) $record['result_count'] ); ?></td>
+									<td><?php $this->render_page_column( $record ); ?></td>
 									<td><?php echo esc_html( $this->get_user_label( $record ) ); ?></td>
+									<td>
+										<?php
+										$record_id = md5( (string) $record['search_term'] . '-' . (string) $record['user_id'] );
+										?>
+										<button type="button" class="button button-small sai-toggle-details" data-target="sai-details-<?php echo esc_attr( $record_id ); ?>" data-show-label="<?php echo esc_attr__( 'Details', 'search-analytics-insights' ); ?>" data-hide-label="<?php echo esc_attr__( 'Hide', 'search-analytics-insights' ); ?>">
+											<?php esc_html_e( 'Details', 'search-analytics-insights' ); ?>
+										</button>
+									</td>
 								</tr>
+								<?php $this->render_details_row( $record, 7 ); ?>
 							<?php endforeach; ?>
 						<?php endif; ?>
 					</tbody>
@@ -311,6 +456,9 @@ final class Dashboard {
 										'search_term' => $filters['search_term'],
 										'no_results'  => $filters['no_results'],
 										'per_page'    => $filters['per_page'],
+										'page_type'   => $filters['page_type'],
+										'page_title'  => $filters['page_title'],
+										'page_url'    => $filters['page_url'],
 										'paged'       => '%#%',
 									),
 									static function ( $value ): bool {
@@ -348,20 +496,32 @@ final class Dashboard {
 							<th><?php esc_html_e( 'Search Term', 'search-analytics-insights' ); ?></th>
 							<th><?php esc_html_e( 'Date', 'search-analytics-insights' ); ?></th>
 							<th><?php esc_html_e( 'Results', 'search-analytics-insights' ); ?></th>
+							<th><?php esc_html_e( 'From', 'search-analytics-insights' ); ?></th>
 							<th><?php esc_html_e( 'User', 'search-analytics-insights' ); ?></th>
+							<th><?php esc_html_e( 'Actions', 'search-analytics-insights' ); ?></th>
 						</tr>
 					</thead>
 					<tbody>
 						<?php if ( empty( $recent_activity ) ) : ?>
-							<tr><td colspan="4"><?php esc_html_e( 'No recent search activity found.', 'search-analytics-insights' ); ?></td></tr>
+							<tr><td colspan="6"><?php esc_html_e( 'No recent search activity found.', 'search-analytics-insights' ); ?></td></tr>
 						<?php else : ?>
 							<?php foreach ( $recent_activity as $record ) : ?>
 								<tr>
 									<td><?php echo esc_html( (string) $record['search_term'] ); ?></td>
 									<td><?php echo esc_html( (string) $record['searched_at'] ); ?></td>
 									<td><?php echo esc_html( (string) $record['result_count'] ); ?></td>
+									<td><?php $this->render_page_column( $record ); ?></td>
 									<td><?php echo esc_html( $this->get_user_label( $record ) ); ?></td>
+									<td>
+										<?php
+										$record_id = ! empty( $record['id'] ) ? (string) $record['id'] : md5( (string) $record['search_term'] . '-' . (string) $record['searched_at'] );
+										?>
+										<button type="button" class="button button-small sai-toggle-details" data-target="sai-details-<?php echo esc_attr( $record_id ); ?>" data-show-label="<?php echo esc_attr__( 'Details', 'search-analytics-insights' ); ?>" data-hide-label="<?php echo esc_attr__( 'Hide', 'search-analytics-insights' ); ?>">
+											<?php esc_html_e( 'Details', 'search-analytics-insights' ); ?>
+										</button>
+									</td>
 								</tr>
+								<?php $this->render_details_row( $record, 6 ); ?>
 							<?php endforeach; ?>
 						<?php endif; ?>
 					</tbody>
@@ -590,6 +750,9 @@ final class Dashboard {
 			'no_results'  => isset( $_GET['no_results'] ) ? absint( wp_unslash( $_GET['no_results'] ) ) : 0, // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			'page'        => max( 1, $page ),
 			'per_page'    => max( 1, min( 100, $per_page ) ),
+			'page_type'   => isset( $_GET['page_type'] ) ? sanitize_text_field( wp_unslash( $_GET['page_type'] ) ) : '', // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			'page_title'  => isset( $_GET['page_title'] ) ? sanitize_text_field( wp_unslash( $_GET['page_title'] ) ) : '', // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			'page_url'    => isset( $_GET['page_url'] ) ? sanitize_text_field( wp_unslash( $_GET['page_url'] ) ) : '', // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		);
 	}
 
@@ -655,6 +818,125 @@ final class Dashboard {
 			<span class="search-analytics-insights-card-label"><?php echo esc_html( $label ); ?></span>
 			<span class="search-analytics-insights-card-value"><?php echo esc_html( (string) $value ); ?></span>
 		</div>
+		<?php
+	}
+
+	/**
+	 * Render the page context column cell.
+	 *
+	 * @param array<string, mixed> $record Search record.
+	 *
+	 * @return void
+	 */
+	private function render_page_column( array $record ): void {
+		$page_title = ! empty( $record['page_title'] ) ? $record['page_title'] : '';
+		$page_url   = ! empty( $record['page_url'] ) ? $record['page_url'] : '';
+		$referrer   = ! empty( $record['referrer'] ) ? $record['referrer'] : '';
+		$page_type  = ! empty( $record['page_type'] ) ? $record['page_type'] : '';
+
+		if ( empty( $page_title ) && empty( $page_url ) ) {
+			echo '<span class="description">' . esc_html__( 'Direct/Unknown', 'search-analytics-insights' ) . '</span>';
+			return;
+		}
+
+		$display_title = ! empty( $page_title ) ? $page_title : __( 'Untitled Page', 'search-analytics-insights' );
+		$display_path  = $page_url;
+		if ( ! empty( $page_url ) ) {
+			$parsed_url = wp_parse_url( $page_url );
+			$display_path = isset( $parsed_url['path'] ) ? $parsed_url['path'] : $page_url;
+			if ( isset( $parsed_url['query'] ) ) {
+				$display_path .= '?' . $parsed_url['query'];
+			}
+		}
+
+		?>
+		<div class="sai-page-column-cell" style="display: flex; flex-direction: column; gap: 2px;">
+			<div class="sai-page-title-row" style="display: flex; align-items: center; gap: 6px;">
+				<span class="dashicons dashicons-admin-page" style="font-size: 16px; width: 16px; height: 16px; color: var(--sai-muted);" title="<?php echo esc_attr( $page_type ); ?>"></span>
+				<strong class="sai-page-title" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="<?php echo esc_attr( $display_title ); ?>">
+					<?php echo esc_html( $display_title ); ?>
+				</strong>
+			</div>
+			<?php if ( ! empty( $page_url ) ) : ?>
+				<a class="sai-page-url-link" href="<?php echo esc_url( $page_url ); ?>" target="_blank" style="font-size: 0.85em; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--sai-muted);" title="<?php echo esc_attr( $page_url ); ?>">
+					<?php echo esc_html( $display_path ); ?>
+				</a>
+			<?php endif; ?>
+			<?php if ( ! empty( $referrer ) ) : ?>
+				<div class="sai-referrer-row" style="display: flex; align-items: center; gap: 4px; font-size: 0.8em; color: var(--sai-muted);">
+					<span class="dashicons dashicons-share-alt2" style="font-size: 14px; width: 14px; height: 14px;" title="<?php echo esc_attr__( 'Referrer: ', 'search-analytics-insights' ) . esc_attr( $referrer ); ?>"></span>
+					<span style="max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="<?php echo esc_attr( $referrer ); ?>">
+						<?php echo esc_html( $referrer ); ?>
+					</span>
+				</div>
+			<?php endif; ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Render the expandable details row.
+	 *
+	 * @param array<string, mixed> $record  Search record.
+	 * @param int                  $colspan Number of columns to span.
+	 *
+	 * @return void
+	 */
+	private function render_details_row( array $record, int $colspan ): void {
+		$page_title = ! empty( $record['page_title'] ) ? $record['page_title'] : __( 'N/A', 'search-analytics-insights' );
+		$page_url   = ! empty( $record['page_url'] ) ? $record['page_url'] : '';
+		$referrer   = ! empty( $record['referrer'] ) ? $record['referrer'] : __( 'Direct / None', 'search-analytics-insights' );
+		$page_type  = ! empty( $record['page_type'] ) ? $record['page_type'] : __( 'Other / Unknown', 'search-analytics-insights' );
+
+		$record_id = '';
+		if ( ! empty( $record['id'] ) ) {
+			$record_id = (string) $record['id'];
+		} elseif ( ! empty( $record['latest_id'] ) ) {
+			$record_id = (string) $record['latest_id'];
+		} else {
+			$record_id = md5( (string) $record['search_term'] . '-' . (string) ( isset( $record['searched_at'] ) ? $record['searched_at'] : ( isset( $record['user_id'] ) ? $record['user_id'] : '' ) ) );
+		}
+		?>
+		<tr id="sai-details-<?php echo esc_attr( $record_id ); ?>" class="sai-details-row" style="display: none;">
+			<td colspan="<?php echo esc_attr( (string) $colspan ); ?>">
+				<div class="sai-details-content" style="padding: 12px 16px; background-color: var(--sai-surface-alt); border-top: 1px solid var(--sai-border); border-bottom: 1px solid var(--sai-border);">
+					<div class="sai-details-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+						<div>
+							<strong><?php esc_html_e( 'Page Title:', 'search-analytics-insights' ); ?></strong>
+							<div><?php echo esc_html( $page_title ); ?></div>
+						</div>
+						<div>
+							<strong><?php esc_html_e( 'Page URL:', 'search-analytics-insights' ); ?></strong>
+							<div>
+								<?php if ( ! empty( $page_url ) ) : ?>
+									<a href="<?php echo esc_url( $page_url ); ?>" target="_blank"><?php echo esc_html( $page_url ); ?></a>
+								<?php else : ?>
+									<?php echo esc_html__( 'N/A', 'search-analytics-insights' ); ?>
+								<?php endif; ?>
+							</div>
+						</div>
+						<div>
+							<strong><?php esc_html_e( 'Page Type:', 'search-analytics-insights' ); ?></strong>
+							<div>
+								<span class="sai-page-type-badge" style="display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; background-color: var(--sai-accent-soft); color: var(--sai-accent);">
+									<?php echo esc_html( $page_type ); ?>
+								</span>
+							</div>
+						</div>
+						<div>
+							<strong><?php esc_html_e( 'Referrer:', 'search-analytics-insights' ); ?></strong>
+							<div style="word-break: break-all;">
+								<?php if ( filter_var( $referrer, FILTER_VALIDATE_URL ) ) : ?>
+									<a href="<?php echo esc_url( $referrer ); ?>" target="_blank"><?php echo esc_html( $referrer ); ?></a>
+								<?php else : ?>
+									<?php echo esc_html( $referrer ); ?>
+								<?php endif; ?>
+							</div>
+						</div>
+					</div>
+				</div>
+			</td>
+		</tr>
 		<?php
 	}
 }
