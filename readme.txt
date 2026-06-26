@@ -18,6 +18,8 @@ Track search activity across your website, identify popular searches, discover s
 
 Everything is stored locally in your WordPress database. No external analytics services or third-party tracking platforms are required.
 
+Display your search form anywhere using a shortcode, widget, or Gutenberg block.
+
 = Key Features =
 
 * Track native WordPress searches.
