@@ -1,6 +1,6 @@
 === Search Analytics & Insights ===
 Contributors: vivekprajapati
-Tags: search, analytics, ajax search, search tracking, dashboard, insights
+Tags: search, analytics, ajax search, search tracking, dashboard
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 8.0
