@@ -123,10 +123,6 @@ Lists search terms that are trending within the last 7 days.
     ```text
     [search_insights_trending limit="5" title="Trending This Week"]
     ```
-
-> [!WARNING]
-> The old shortcode `[search_insights_ajax_form]` is deprecated in version 1.0.0. Please replace it with `[search_insights_form]` in your pages. It will forward queries to the unified form for backwards compatibility.
-
 ---
 
 ## Gutenberg Block
