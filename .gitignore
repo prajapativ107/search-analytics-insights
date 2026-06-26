@@ -32,3 +32,4 @@ coverage/
 # Languages
 /languages/
 /search-analytics-insights.pot
+composer.json
