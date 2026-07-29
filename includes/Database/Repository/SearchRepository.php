@@ -451,7 +451,7 @@ final class SearchRepository {
 
 		$sql .= ' GROUP BY v.page_title, v.page_url ORDER BY search_count DESC, v.page_title ASC LIMIT %d';
 
-		$params[] = $limit;s
+		$params[] = $limit;
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Query is safe because SQL structure is constructed dynamically using safe placeholders, and all parameters are prepared.
 		$results = $wpdb->get_results( $wpdb->prepare( $sql, ...$params ), ARRAY_A );
