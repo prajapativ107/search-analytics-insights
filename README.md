@@ -175,12 +175,11 @@ See the full history of changes in [CHANGELOG.md](CHANGELOG.md).
 
 ## Release Process
 
-We use GitHub Actions to automate linting checks and security scans for development. Actual plugin deployments to the WordPress.org directory are performed manually using SVN.
+We use GitHub Actions to automate linting checks for development. Actual plugin deployments to the WordPress.org directory are performed manually using SVN.
 
 ### 1. Development & Continuous Integration
-Pushing changes or submitting pull requests triggers automation checks:
+Pushing changes or submitting pull requests triggers automated checks:
 * **CI Workflow**: Runs syntax check, composer validation, and PHPCS standard checks across PHP 8.0–8.3.
-* **Security Scanning**: Automated CodeQL scans identify vulnerabilities weekly and on push.
 * **Deployments**: No automatic deployment is performed from GitHub.
 
 ### 2. Manual WordPress.org Release
