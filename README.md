@@ -173,25 +173,39 @@ See the full history of changes in [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
-## Release Process
+## Development Workflow
 
-We use GitHub Actions to automate linting checks for development. Actual plugin deployments to the WordPress.org directory are performed manually using SVN.
+To contribute to SearchLens, please follow this simple development workflow:
 
-### 1. Development & Continuous Integration
-Pushing changes or submitting pull requests triggers automated checks:
-* **CI Workflow**: Runs syntax check, composer validation, and PHPCS standard checks across PHP 8.0–8.3.
-* **Deployments**: No automatic deployment is performed from GitHub.
-
-### 2. Manual WordPress.org Release
-To publish a new version of the plugin:
-1. Update version headers in `searchlens-search-analytics.php` and `includes/Core/Constants.php`.
-2. Commit and push version updates to the `main` branch on GitHub.
-3. Tag the release commit:
+1. **Clone the Repository**:
    ```bash
-   git tag v1.0.1
-   git push origin v1.0.1
+   git clone https://github.com/prajapativ107/search-analytics-insights.git
+   cd search-analytics-insights
    ```
-4. Checkout the official WordPress.org SVN repository, copy assets and built plugin files into `trunk/` and `tags/1.0.1/`, and commit the changes to SVN manually to publish the release.
+2. **Create a Feature Branch**:
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+3. **Make Changes**:
+   Implement your enhancements, bug fixes, or modifications inside the plugin.
+4. **Run Local Validations**:
+   Ensure dependencies are installed and run lint tests locally to verify coding standards compliance:
+   ```bash
+   composer install
+   composer run lint
+   ```
+5. **Commit Changes**:
+   Write a clear, descriptive commit message and commit your changes:
+   ```bash
+   git commit -am "Add descriptive message about your changes"
+   ```
+6. **Push to GitHub**:
+   Push the feature branch to your fork or origin repository:
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+7. **Open a Pull Request**:
+   Go to the GitHub repository and open a Pull Request targeting the `main` branch. GitHub Actions will automatically run the CI pipeline to validate your contribution.
 
 ---
 
