@@ -1,0 +1,33 @@
+# Enforce Unix line endings (LF) for all code and text files
+* text=auto eol=lf
+
+# Explicitly declare file types that are always text/binary
+*.php text
+*.css text
+*.js text
+*.json text
+*.md text
+*.txt text
+*.yml text
+*.xml text
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg text
+
+# Exclude dev tools and config files from git archives/exports (e.g. when downloaded as ZIP from GitHub)
+.editorconfig export-ignore
+.gitattributes export-ignore
+.gitignore export-ignore
+.github/ export-ignore
+composer.json export-ignore
+composer.lock export-ignore
+phpcs.xml export-ignore
+phpcbf.xml export-ignore
+phpunit.xml export-ignore
+tests/ export-ignore
+REVIEW.md export-ignore
+RELEASE.md export-ignore
+docs/ export-ignore

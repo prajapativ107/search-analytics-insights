@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<ruleset name="SearchLens">
+	<description>PHP_CodeSniffer configuration for SearchLens.</description>
+
+	<!-- Limit scanning to PHP files within our plugin -->
+	<file>.</file>
+
+	<!-- Exclude external libraries and compiled asset files -->
+	<exclude-pattern>*/vendor/*</exclude-pattern>
+	<exclude-pattern>*/node_modules/*</exclude-pattern>
+	<exclude-pattern>*/blocks/search-widget/edit\.asset\.php</exclude-pattern>
+
+	<!-- How to scan -->
+	<arg value="ps"/>
+	<arg name="colors"/>
+	<arg name="extensions" value="php"/>
+
+	<!-- Rules: WordPress Coding Standards -->
+	<rule ref="WordPress">
+		<exclude name="WordPress.Files.FileName"/>
+		<exclude name="Squiz.Commenting.VariableComment.Missing"/>
+		<exclude name="Squiz.Commenting.InlineComment.InvalidEndChar"/>
+	</rule>
+
+	<!-- Exclude files in languages directory -->
+	<exclude-pattern>*/languages/*</exclude-pattern>
+
+	<!-- Minimum WordPress version supported -->
+	<config name="minimum_supported_wp_version" value="6.0"/>
+</ruleset>

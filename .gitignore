@@ -1,34 +1,44 @@
-
 # macOS
 .DS_Store
+Thumbs.db
 
 # IDE
 .vscode/
 .idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
 
 # Composer
 /vendor/
+composer.lock
 
 # Node
 /node_modules/
+package-lock.json
+npm-debug.log
+yarn-error.log
 
-# Build
+# Build & Dist
 /dist/
 /build/
+*.zip
+*.tar.gz
 
 # Logs
 *.log
+pip-log.txt
 
 # Environment
 .env
 .env.*
 
-# PHPUnit
+# PHPUnit & Testing
 .phpunit.result.cache
-phpcs.xml
-phpcbf.xml
-
-# Coverage
+/tests/coverage/
 coverage/
-composer.json
-*.zip
+.phpunit.state
+phpunit.xml
+phpcbf.xml
