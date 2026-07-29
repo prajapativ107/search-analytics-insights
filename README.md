@@ -173,6 +173,29 @@ See the full history of changes in [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
+## Release Process
+
+We use GitHub Actions to automate linting checks and security scans for development. Actual plugin deployments to the WordPress.org directory are performed manually using SVN.
+
+### 1. Development & Continuous Integration
+Pushing changes or submitting pull requests triggers automation checks:
+* **CI Workflow**: Runs syntax check, composer validation, and PHPCS standard checks across PHP 8.0–8.3.
+* **Security Scanning**: Automated CodeQL scans identify vulnerabilities weekly and on push.
+* **Deployments**: No automatic deployment is performed from GitHub.
+
+### 2. Manual WordPress.org Release
+To publish a new version of the plugin:
+1. Update version headers in `searchlens-search-analytics.php` and `includes/Core/Constants.php`.
+2. Commit and push version updates to the `main` branch on GitHub.
+3. Tag the release commit:
+   ```bash
+   git tag v1.0.1
+   git push origin v1.0.1
+   ```
+4. Checkout the official WordPress.org SVN repository, copy assets and built plugin files into `trunk/` and `tags/1.0.1/`, and commit the changes to SVN manually to publish the release.
+
+---
+
 ## Credits
 
 * Maintained by [Vivek Prajapati](https://github.com/prajapativ107)

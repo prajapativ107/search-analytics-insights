@@ -1,4 +1,7 @@
 {
+    "name": "prajapativ107/search-analytics-insights",
+    "description": "Track WordPress site searches and provide analytics for administrators.",
+    "license": "GPL-2.0-or-later",
     "require-dev": {
         "squizlabs/php_codesniffer": "^3.10",
         "wp-coding-standards/wpcs": "^3.1",
