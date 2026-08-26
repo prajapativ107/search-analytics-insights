@@ -66,8 +66,9 @@ final class SearchRepository {
 	public function get_summary( array $filters = array() ): array {
 		global $wpdb;
 
-		$where_data = $this->build_where_conditions( $filters );
-		$table      = Constants::table_name();
+		$where_data   = $this->build_where_conditions( $filters );
+		$table        = Constants::table_name();
+		$table_clicks = Constants::table_clicks_name();
 
 		$sql    = 'SELECT COUNT(*) AS total_searches, COUNT(DISTINCT v.search_term_hash) AS unique_searches, SUM(CASE WHEN v.result_count = 0 THEN 1 ELSE 0 END) AS no_result_searches FROM %i AS v';
 		$params = array( $table );
@@ -80,10 +81,43 @@ final class SearchRepository {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Query is safe because SQL structure is constructed dynamically using safe placeholders, and all parameters are prepared.
 		$row = $wpdb->get_row( $wpdb->prepare( $sql, ...$params ), ARRAY_A );
 
+		// 1. Total eligible searches (ajax source)
+		$eligible_sql          = 'SELECT COUNT(*) FROM %i AS v';
+		$eligible_conditions   = $where_data['conditions'];
+		$eligible_conditions[] = "v.source = 'ajax_search'";
+		$eligible_sql         .= ' WHERE ' . implode( ' AND ', $eligible_conditions );
+		$eligible_params       = array_merge( array( $table ), $where_data['params'] );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+		$total_eligible = (int) $wpdb->get_var( $wpdb->prepare( $eligible_sql, ...$eligible_params ) );
+
+		// 2. Clicked searches count (unique search_id with at least one click)
+		$clicked_sql    = 'SELECT COUNT(DISTINCT c.search_id) FROM %i AS c INNER JOIN %i AS v ON c.search_id = v.id';
+		$clicked_params = array_merge( array( $table_clicks, $table ), $where_data['params'] );
+		if ( ! empty( $where_data['conditions'] ) ) {
+			$clicked_sql .= ' WHERE ' . implode( ' AND ', $where_data['conditions'] );
+		}
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+		$clicked_searches = (int) $wpdb->get_var( $wpdb->prepare( $clicked_sql, ...$clicked_params ) );
+
+		// 3. Raw clicks count
+		$raw_clicks_sql    = 'SELECT COUNT(*) FROM %i AS c INNER JOIN %i AS v ON c.search_id = v.id';
+		$raw_clicks_params = array_merge( array( $table_clicks, $table ), $where_data['params'] );
+		if ( ! empty( $where_data['conditions'] ) ) {
+			$raw_clicks_sql .= ' WHERE ' . implode( ' AND ', $where_data['conditions'] );
+		}
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+		$total_clicks = (int) $wpdb->get_var( $wpdb->prepare( $raw_clicks_sql, ...$raw_clicks_params ) );
+
+		$ctr = $total_eligible > 0 ? ( $clicked_searches / $total_eligible ) * 100 : 0.0;
+
 		return array(
 			'total_searches'     => isset( $row['total_searches'] ) ? (int) $row['total_searches'] : 0,
 			'unique_searches'    => isset( $row['unique_searches'] ) ? (int) $row['unique_searches'] : 0,
 			'no_result_searches' => isset( $row['no_result_searches'] ) ? (int) $row['no_result_searches'] : 0,
+			'total_clicks'       => $total_clicks,
+			'clicked_searches'   => $clicked_searches,
+			'total_eligible'     => $total_eligible,
+			'ctr'                => $ctr,
 		);
 	}
 
@@ -363,6 +397,7 @@ final class SearchRepository {
 			$post_types = array( 'post', 'page' );
 		}
 
+		add_filter( 'posts_search', array( $this, 'modify_search_sql' ), 500, 2 );
 		$query = new \WP_Query(
 			array(
 				's'                   => $search_term,
@@ -371,8 +406,10 @@ final class SearchRepository {
 				'posts_per_page'      => max( 1, min( 20, absint( $limit ) ) ),
 				'no_found_rows'       => false,
 				'ignore_sticky_posts' => true,
+				'vplens_search'       => true,
 			)
 		);
+		remove_filter( 'posts_search', array( $this, 'modify_search_sql' ), 500 );
 
 		$results = array();
 
@@ -660,5 +697,377 @@ final class SearchRepository {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		return $wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE searched_at < %s', $table, $date ) );
+	}
+
+	/**
+	 * Modify search SQL to search additional WooCommerce fields.
+	 *
+	 * @param string    $search   Search clause.
+	 * @param \WP_Query $wp_query Query instance.
+	 *
+	 * @return string
+	 */
+	public function modify_search_sql( string $search, \WP_Query $wp_query ): string {
+		global $wpdb;
+
+		if ( empty( $search ) || ! $wp_query->get( 'vplens_search' ) ) {
+			return $search;
+		}
+
+		$post_types        = (array) $wp_query->get( 'post_type' );
+		$is_product_search = in_array( 'product', $post_types, true ) && class_exists( 'WooCommerce' );
+
+		if ( ! $is_product_search ) {
+			return $search;
+		}
+
+		$search_term = $wp_query->get( 's' );
+		if ( '' === trim( $search_term ) ) {
+			return $search;
+		}
+
+		$settings    = get_option( Constants::OPTION_SETTINGS, array() );
+		$wc_settings = $settings['woocommerce'] ?? array(
+			'enabled'       => true,
+			'search_fields' => array( 'title', 'sku', 'short_desc', 'desc', 'category', 'tag' ),
+		);
+
+		if ( empty( $wc_settings['enabled'] ) ) {
+			return $search;
+		}
+
+		$search_fields = $wc_settings['search_fields'] ?? array( 'title', 'sku' );
+
+		// Split search term into individual words
+		$terms = preg_split( '/\s+/u', trim( $search_term ) );
+		$terms = array_filter( $terms );
+
+		if ( empty( $terms ) ) {
+			return $search;
+		}
+
+		$term_clauses = array();
+
+		foreach ( $terms as $term ) {
+			$like    = '%' . $wpdb->esc_like( $term ) . '%';
+			$clauses = array();
+
+			// 1. Product Title
+			if ( in_array( 'title', $search_fields, true ) ) {
+				$clauses[] = $wpdb->prepare( "({$wpdb->posts}.post_title LIKE %s)", $like );
+			}
+
+			// 2. Full Description
+			if ( in_array( 'desc', $search_fields, true ) ) {
+				$clauses[] = $wpdb->prepare( "({$wpdb->posts}.post_content LIKE %s)", $like );
+			}
+
+			// 3. Short Description
+			if ( in_array( 'short_desc', $search_fields, true ) ) {
+				$clauses[] = $wpdb->prepare( "({$wpdb->posts}.post_excerpt LIKE %s)", $like );
+			}
+
+			// 4. SKU (Simple and Variable parent lookup)
+			if ( in_array( 'sku', $search_fields, true ) ) {
+				$sku_matched_ids = $this->get_product_ids_by_sku( $term );
+				if ( ! empty( $sku_matched_ids ) ) {
+					$ids_str   = implode( ',', $sku_matched_ids );
+					$clauses[] = "({$wpdb->posts}.ID IN ($ids_str))";
+				}
+			}
+
+			// 5. Product Category
+			if ( in_array( 'category', $search_fields, true ) ) {
+				$cat_matched_ids = $this->get_product_ids_by_taxonomy( 'product_cat', $term );
+				if ( ! empty( $cat_matched_ids ) ) {
+					$ids_str   = implode( ',', $cat_matched_ids );
+					$clauses[] = "({$wpdb->posts}.ID IN ($ids_str))";
+				}
+			}
+
+			// 6. Product Tag
+			if ( in_array( 'tag', $search_fields, true ) ) {
+				$tag_matched_ids = $this->get_product_ids_by_taxonomy( 'product_tag', $term );
+				if ( ! empty( $tag_matched_ids ) ) {
+					$ids_str   = implode( ',', $tag_matched_ids );
+					$clauses[] = "({$wpdb->posts}.ID IN ($ids_str))";
+				}
+			}
+
+			// 7. Product Attributes
+			if ( in_array( 'attributes', $search_fields, true ) ) {
+				$attr_matched_ids = $this->get_product_ids_by_attributes( $term );
+				if ( ! empty( $attr_matched_ids ) ) {
+					$ids_str   = implode( ',', $attr_matched_ids );
+					$clauses[] = "({$wpdb->posts}.ID IN ($ids_str))";
+				}
+			}
+
+			if ( ! empty( $clauses ) ) {
+				$term_clauses[] = '(' . implode( ' OR ', $clauses ) . ')';
+			}
+		}
+
+		if ( ! empty( $term_clauses ) ) {
+			$search = ' AND (' . implode( ' AND ', $term_clauses ) . ')';
+		}
+
+		return $search;
+	}
+
+	/**
+	 * Get product IDs matching SKU (both simple and variable parents).
+	 *
+	 * @param string $term Search term.
+	 *
+	 * @return array
+	 */
+	private function get_product_ids_by_sku( string $term ): array {
+		global $wpdb;
+
+		// Fetch all post IDs matching SKU meta
+		$query = $wpdb->prepare(
+			"SELECT DISTINCT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_sku' AND meta_value LIKE %s LIMIT 100",
+			'%' . $wpdb->esc_like( $term ) . '%'
+		);
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
+		$post_ids = array_map( 'intval', $wpdb->get_col( $query ) );
+
+		if ( empty( $post_ids ) ) {
+			return array();
+		}
+
+		$product_ids = array();
+		foreach ( $post_ids as $id ) {
+			$post_type = get_post_type( $id );
+			if ( 'product_variation' === $post_type ) {
+				$parent_id = wp_get_post_parent_id( $id );
+				if ( $parent_id ) {
+					$product_ids[] = $parent_id;
+				}
+			} elseif ( 'product' === $post_type ) {
+				$product_ids[] = $id;
+			}
+		}
+
+		return array_values( array_unique( $product_ids ) );
+	}
+
+	/**
+	 * Get product IDs matching terms of a custom taxonomy.
+	 *
+	 * @param string $taxonomy Taxonomy name.
+	 * @param string $term     Search term.
+	 *
+	 * @return array
+	 */
+	private function get_product_ids_by_taxonomy( string $taxonomy, string $term ): array {
+		global $wpdb;
+
+		$query = $wpdb->prepare(
+			"SELECT DISTINCT tr.object_id FROM {$wpdb->term_relationships} tr 
+			 INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id 
+			 INNER JOIN {$wpdb->terms} t ON tt.term_id = t.term_id 
+			 WHERE tt.taxonomy = %s AND t.name LIKE %s LIMIT 100",
+			$taxonomy,
+			'%' . $wpdb->esc_like( $term ) . '%'
+		);
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
+		return array_map( 'intval', $wpdb->get_col( $query ) );
+	}
+
+	/**
+	 * Get product IDs matching terms of global product attributes.
+	 *
+	 * @param string $term Search term.
+	 *
+	 * @return array
+	 */
+	private function get_product_ids_by_attributes( string $term ): array {
+		global $wpdb;
+
+		if ( ! function_exists( 'wc_get_attribute_taxonomies' ) ) {
+			return array();
+		}
+
+		$attribute_taxonomies = wc_get_attribute_taxonomies();
+		$taxonomies           = array();
+		foreach ( $attribute_taxonomies as $tax ) {
+			$taxonomies[] = wc_attribute_taxonomy_name( $tax->attribute_name );
+		}
+
+		if ( empty( $taxonomies ) ) {
+			return array();
+		}
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$query = $wpdb->prepare(
+			"SELECT DISTINCT tr.object_id FROM {$wpdb->term_relationships} tr 
+			 INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id 
+			 INNER JOIN {$wpdb->terms} t ON tt.term_id = t.term_id 
+			 WHERE tt.taxonomy IN ($placeholders) AND t.name LIKE %s LIMIT 100",
+			array_merge( $taxonomies, array( '%' . $wpdb->esc_like( $term ) . '%' ) )
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
+		return array_map( 'intval', $wpdb->get_col( $query ) );
+	}
+
+	/**
+	 * Insert a click event.
+	 *
+	 * @param int         $search_id  Search log ID.
+	 * @param int         $post_id    Clicked post/product ID.
+	 * @param int|null    $user_id    User ID.
+	 * @param string|null $session_id Session ID.
+	 *
+	 * @return int|false
+	 */
+	public function insert_click( int $search_id, int $post_id, ?int $user_id = null, ?string $session_id = null ) {
+		global $wpdb;
+
+		$data = array(
+			'search_id'  => $search_id,
+			'post_id'    => $post_id,
+			'clicked_at' => current_time( 'mysql', true ),
+			'user_id'    => $user_id,
+			'session_id' => $session_id,
+		);
+
+		$format = array( '%d', '%d', '%s', '%d', '%s' );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+		$inserted = $wpdb->insert( Constants::table_clicks_name(), $data, $format );
+
+		if ( false === $inserted ) {
+			return false;
+		}
+
+		return (int) $wpdb->insert_id;
+	}
+
+	/**
+	 * Check if a search record exists.
+	 *
+	 * @param int $search_id Search log ID.
+	 *
+	 * @return bool
+	 */
+	public function search_exists( int $search_id ): bool {
+		global $wpdb;
+
+		$query = $wpdb->prepare(
+			'SELECT COUNT(*) FROM %i WHERE id = %d',
+			Constants::table_name(),
+			$search_id
+		);
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
+		return (int) $wpdb->get_var( $query ) > 0;
+	}
+
+	/**
+	 * Get most clicked products.
+	 *
+	 * @param array<string, mixed> $filters Query filters.
+	 * @param int                  $limit   Limit.
+	 *
+	 * @return array
+	 */
+	public function get_most_clicked_products( array $filters = array(), int $limit = 10 ): array {
+		global $wpdb;
+
+		$table_searches = Constants::table_name();
+		$table_clicks   = Constants::table_clicks_name();
+		$limit          = max( 1, absint( $limit ) );
+
+		// Prefix searches as v in where conditions
+		$where_data = $this->build_where_conditions( $filters );
+
+		$sql    = "SELECT c.post_id, COUNT(*) AS click_count, COUNT(DISTINCT c.search_id) AS unique_searches FROM {$table_clicks} AS c INNER JOIN {$table_searches} AS v ON c.search_id = v.id";
+		$params = array();
+
+		if ( ! empty( $where_data['conditions'] ) ) {
+			$sql   .= ' WHERE ' . implode( ' AND ', $where_data['conditions'] );
+			$params = $where_data['params'];
+		}
+
+		$sql     .= ' GROUP BY c.post_id ORDER BY click_count DESC LIMIT %d';
+		$params[] = $limit;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
+		$results = $wpdb->get_results( $wpdb->prepare( $sql, ...$params ), ARRAY_A );
+
+		$products = array();
+		if ( is_array( $results ) ) {
+			foreach ( $results as $row ) {
+				$post_id       = (int) $row['post_id'];
+				$product_title = get_the_title( $post_id );
+				$products[]    = array(
+					'post_id'         => $post_id,
+					'title'           => $product_title ? $product_title : __( '(Deleted Product)', 'search-analytics-insights' ),
+					'click_count'     => (int) $row['click_count'],
+					'unique_searches' => (int) $row['unique_searches'],
+				);
+			}
+		}
+
+		return $products;
+	}
+
+	/**
+	 * Get search performance metrics grouped by keyword.
+	 *
+	 * @param array<string, mixed> $filters Query filters.
+	 * @param int                  $limit   Limit.
+	 *
+	 * @return array
+	 */
+	public function get_search_performance( array $filters = array(), int $limit = 10 ): array {
+		global $wpdb;
+
+		$table_searches = Constants::table_name();
+		$table_clicks   = Constants::table_clicks_name();
+		$limit          = max( 1, absint( $limit ) );
+
+		$where_data = $this->build_where_conditions( $filters );
+
+		// We select from Searches table, and do a left join with Clicks table
+		$sql = "SELECT v.search_term, COUNT(DISTINCT v.id) AS search_count, MIN(v.result_count) AS min_results, COUNT(DISTINCT c.id) AS raw_clicks, COUNT(DISTINCT c.search_id) AS clicked_searches
+				FROM {$table_searches} AS v
+				LEFT JOIN {$table_clicks} AS c ON c.search_id = v.id";
+
+		$params = array();
+		if ( ! empty( $where_data['conditions'] ) ) {
+			$sql   .= ' WHERE ' . implode( ' AND ', $where_data['conditions'] );
+			$params = $where_data['params'];
+		}
+
+		$sql     .= ' GROUP BY v.search_term ORDER BY search_count DESC, v.search_term ASC LIMIT %d';
+		$params[] = $limit;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
+		$results = $wpdb->get_results( $wpdb->prepare( $sql, ...$params ), ARRAY_A );
+
+		$performance = array();
+		if ( is_array( $results ) ) {
+			foreach ( $results as $row ) {
+				$search_count     = (int) $row['search_count'];
+				$clicked_searches = (int) $row['clicked_searches'];
+				$ctr              = $search_count > 0 ? ( $clicked_searches / $search_count ) * 100 : 0.0;
+
+				$performance[] = array(
+					'search_term'      => $row['search_term'],
+					'search_count'     => $search_count,
+					'min_results'      => (int) $row['min_results'],
+					'raw_clicks'       => (int) $row['raw_clicks'],
+					'clicked_searches' => $clicked_searches,
+					'ctr'              => $ctr,
+				);
+			}
+		}
+
+		return $performance;
 	}
 }

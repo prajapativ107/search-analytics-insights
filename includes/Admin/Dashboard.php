@@ -58,6 +58,7 @@ final class Dashboard {
 						<?php $this->render_summary_card( __( 'Total Searches', 'search-analytics-insights' ), (int) $summary['total_searches'] ); ?>
 						<?php $this->render_summary_card( __( 'Unique Searches', 'search-analytics-insights' ), (int) $summary['unique_searches'] ); ?>
 						<?php $this->render_summary_card( __( 'No Results', 'search-analytics-insights' ), (int) $summary['no_result_searches'] ); ?>
+						<?php $this->render_summary_card( __( 'Search CTR', 'search-analytics-insights' ), number_format( $summary['ctr'] ?? 0, 1 ) . '%' ); ?>
 					</div>
 				</div>
 				
@@ -167,13 +168,15 @@ final class Dashboard {
 		$top_pages_by_title              = $this->analytics_service->get_top_pages_by_title( $filters, 10 );
 		$top_pages_by_url                = $this->analytics_service->get_top_pages_by_url( $filters, 10 );
 		$searches_by_page_type           = $this->analytics_service->get_searches_by_page_type( $filters, 10 );
+		$most_clicked_products           = $this->analytics_service->get_most_clicked_products( $filters, 10 );
+		$search_perf                     = $this->analytics_service->get_search_performance( $filters, 10 );
 
 		$total_pages = max( 1, (int) ceil( $aggregated_activity['total'] / $filters['per_page'] ) );
 		$page        = min( $filters['page'], $total_pages );
 
 		$this->render_tabbed_page(
 			'analytics',
-			function () use ( $filters, $summary, $aggregated_activity, $recent_activity, $top_terms, $no_result_terms, $daily_counts, $total_pages, $page, $top_pages_by_title, $top_pages_by_url, $searches_by_page_type ) {
+			function () use ( $filters, $summary, $aggregated_activity, $recent_activity, $top_terms, $no_result_terms, $daily_counts, $total_pages, $page, $top_pages_by_title, $top_pages_by_url, $searches_by_page_type, $most_clicked_products, $search_perf ) {
 				?>
 			<div class="vplens-filters-card" aria-labelledby="vplens-filters-card-title">
 				<div class="vplens-filters-header">
@@ -381,6 +384,7 @@ final class Dashboard {
 				<?php $this->render_summary_card( __( 'Total Searches', 'search-analytics-insights' ), (int) $summary['total_searches'] ); ?>
 				<?php $this->render_summary_card( __( 'Unique Searches', 'search-analytics-insights' ), (int) $summary['unique_searches'] ); ?>
 				<?php $this->render_summary_card( __( 'No Result Searches', 'search-analytics-insights' ), (int) $summary['no_result_searches'] ); ?>
+				<?php $this->render_summary_card( __( 'Search CTR', 'search-analytics-insights' ), number_format( $summary['ctr'] ?? 0, 1 ) . '%' ); ?>
 			</div>
 
 			<div class="vplens-summary">
@@ -409,22 +413,26 @@ final class Dashboard {
 				</div>
 
 				<div class="vplens-panel">
-					<h2><?php esc_html_e( 'Top Search Terms', 'search-analytics-insights' ); ?></h2>
+					<h2><?php esc_html_e( 'Search Performance (CTR)', 'search-analytics-insights' ); ?></h2>
 					<table class="widefat striped">
 						<thead>
 							<tr>
-								<th><?php esc_html_e( 'Search Term', 'search-analytics-insights' ); ?></th>
+								<th><?php esc_html_e( 'Search Keyword', 'search-analytics-insights' ); ?></th>
 								<th><?php esc_html_e( 'Searches', 'search-analytics-insights' ); ?></th>
+								<th><?php esc_html_e( 'Clicked', 'search-analytics-insights' ); ?></th>
+								<th><?php esc_html_e( 'Search CTR', 'search-analytics-insights' ); ?></th>
 							</tr>
 						</thead>
 						<tbody>
-							<?php if ( empty( $top_terms ) ) : ?>
-								<tr><td colspan="2"><?php esc_html_e( 'No top search terms yet.', 'search-analytics-insights' ); ?></td></tr>
+							<?php if ( empty( $search_perf ) ) : ?>
+								<tr><td colspan="4"><?php esc_html_e( 'No search performance data yet.', 'search-analytics-insights' ); ?></td></tr>
 							<?php else : ?>
-								<?php foreach ( $top_terms as $row ) : ?>
+								<?php foreach ( $search_perf as $row ) : ?>
 									<tr>
-										<td><?php echo esc_html( (string) $row['search_term'] ); ?></td>
+										<td><strong><?php echo esc_html( (string) $row['search_term'] ); ?></strong></td>
 										<td><?php echo esc_html( (string) $row['search_count'] ); ?></td>
+										<td><?php echo esc_html( (string) $row['clicked_searches'] ); ?></td>
+										<td><?php echo esc_html( number_format( $row['ctr'], 1 ) . '%' ); ?></td>
 									</tr>
 								<?php endforeach; ?>
 							<?php endif; ?>
@@ -449,6 +457,40 @@ final class Dashboard {
 									<tr>
 										<td><?php echo esc_html( (string) $row['search_term'] ); ?></td>
 										<td><?php echo esc_html( (string) $row['search_count'] ); ?></td>
+									</tr>
+								<?php endforeach; ?>
+							<?php endif; ?>
+						</tbody>
+					</table>
+				</div>
+			</div>
+
+			<div class="vplens-summary" style="margin-top: 20px;">
+				<div class="vplens-panel" style="grid-column: span 3; width: 100%;">
+					<h2><?php esc_html_e( 'Most Clicked Products from Search', 'search-analytics-insights' ); ?></h2>
+					<table class="widefat striped">
+						<thead>
+							<tr>
+								<th><?php esc_html_e( 'Product Name', 'search-analytics-insights' ); ?></th>
+								<th><?php esc_html_e( 'Total Clicks', 'search-analytics-insights' ); ?></th>
+								<th><?php esc_html_e( 'Unique Searches With Clicks', 'search-analytics-insights' ); ?></th>
+							</tr>
+						</thead>
+						<tbody>
+							<?php if ( empty( $most_clicked_products ) ) : ?>
+								<tr><td colspan="3"><?php esc_html_e( 'No product clicks recorded yet.', 'search-analytics-insights' ); ?></td></tr>
+							<?php else : ?>
+								<?php foreach ( $most_clicked_products as $row ) : ?>
+									<tr>
+										<td>
+											<strong><?php echo esc_html( $row['title'] ); ?></strong>
+											<br />
+											<span class="description" style="font-size: 0.85em; color: #5f6b7a;">
+												<?php echo esc_html__( 'Product ID:', 'search-analytics-insights' ) . ' ' . absint( $row['post_id'] ); ?>
+											</span>
+										</td>
+										<td><?php echo esc_html( (string) $row['click_count'] ); ?></td>
+										<td><?php echo esc_html( (string) $row['unique_searches'] ); ?></td>
 									</tr>
 								<?php endforeach; ?>
 							<?php endif; ?>
@@ -953,12 +995,12 @@ final class Dashboard {
 	/**
 	 * Render a summary card.
 	 *
-	 * @param string $label Label text.
-	 * @param int    $value Value text.
+	 * @param string     $label Label text.
+	 * @param string|int $value Value text.
 	 *
 	 * @return void
 	 */
-	private function render_summary_card( string $label, int $value ): void {
+	private function render_summary_card( string $label, $value ): void {
 		?>
 		<div class="vplens-card">
 			<span class="vplens-card-label"><?php echo esc_html( $label ); ?></span>

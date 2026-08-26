@@ -86,12 +86,14 @@ final class AjaxSearchForm {
 		);
 
 		ob_start();
+		$wc_settings = $this->settings->get_woocommerce_settings();
 		?>
 		<div
 			class="vplens-ajax-search vplens-ajax-search--<?php echo esc_attr( $form_style ); ?>"
 			data-ajax-url="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>"
 			data-nonce="<?php echo esc_attr( wp_create_nonce( Constants::NONCE_ACTION ) ); ?>"
 			data-action="<?php echo esc_attr( Constants::AJAX_ACTION_SEARCH ); ?>"
+			data-click-action="<?php echo esc_attr( Constants::AJAX_ACTION_CLICK ); ?>"
 			data-min-chars="<?php echo esc_attr( (string) $settings['minimum_characters'] ); ?>"
 			data-debounce="<?php echo esc_attr( (string) $this->settings->get_debounce_time() ); ?>"
 			data-limit="<?php echo esc_attr( (string) $limit ); ?>"
@@ -101,6 +103,16 @@ final class AjaxSearchForm {
 			data-empty-text="<?php echo esc_attr( $this->settings->get_no_results_message() ); ?>"
 			data-min-chars-text="<?php echo esc_attr( sprintf( /* translators: %d: minimum characters count */ __( 'Type at least %d characters to search.', 'search-analytics-insights' ), (int) $settings['minimum_characters'] ) ); ?>"
 			data-error-text="<?php echo esc_attr__( 'Unable to search right now.', 'search-analytics-insights' ); ?>"
+			data-wc-enabled="<?php echo esc_attr( class_exists( 'WooCommerce' ) && ! empty( $wc_settings['enabled'] ) ? '1' : '0' ); ?>"
+			data-wc-show-price="<?php echo esc_attr( ! empty( $wc_settings['show_price'] ) ? '1' : '0' ); ?>"
+			data-wc-show-stock="<?php echo esc_attr( ! empty( $wc_settings['show_stock'] ) ? '1' : '0' ); ?>"
+			data-wc-show-sku="<?php echo esc_attr( ! empty( $wc_settings['show_sku'] ) ? '1' : '0' ); ?>"
+			data-wc-show-sale="<?php echo esc_attr( ! empty( $wc_settings['show_sale_badge'] ) ? '1' : '0' ); ?>"
+			data-wc-show-featured="<?php echo esc_attr( ! empty( $wc_settings['show_featured_badge'] ) ? '1' : '0' ); ?>"
+			data-wc-show-view-all="<?php echo esc_attr( ! empty( $wc_settings['show_view_all'] ) ? '1' : '0' ); ?>"
+			data-wc-view-all-label="<?php echo esc_attr( $wc_settings['view_all_label'] ); ?>"
+			data-wc-show-loader="<?php echo esc_attr( ! empty( $wc_settings['show_loader'] ) ? '1' : '0' ); ?>"
+			data-wc-focus-overlay="<?php echo esc_attr( ! empty( $wc_settings['focus_overlay'] ) ? '1' : '0' ); ?>"
 		>
 			<form class="vplens-ajax-search-form" role="search" method="get" action="<?php echo esc_url( home_url( '/' ) ); ?>" novalidate>
 				<label class="screen-reader-text" for="vplens-ajax-search-input">

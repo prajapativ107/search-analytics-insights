@@ -232,3 +232,145 @@
 		height: 2.75rem;
 	}
 }
+
+/* WooCommerce Product Results Styling */
+.vplens-ajax-search-result--product {
+	background: #ffffff;
+}
+
+.vplens-ajax-search-details {
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 auto;
+	gap: 0.25rem;
+}
+
+.vplens-product-badges {
+	display: inline-flex;
+	gap: 0.35rem;
+	margin-top: 0.1rem;
+}
+
+.vplens-badge {
+	display: inline-block;
+	padding: 0.15rem 0.45rem;
+	font-size: 0.725rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	border-radius: 4px;
+	line-height: 1;
+}
+
+.vplens-badge--sale {
+	background: #e64980;
+	color: #ffffff;
+}
+
+.vplens-badge--featured {
+	background: #0b7285;
+	color: #ffffff;
+}
+
+.vplens-product-meta-row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.65rem;
+	font-size: 0.8rem;
+	color: #5f6b7a;
+}
+
+.vplens-product-sku {
+	font-weight: 600;
+}
+
+.vplens-product-cat {
+	opacity: 0.85;
+}
+
+.vplens-product-price-stock-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	margin-top: 0.15rem;
+	border-top: 1px dashed #eef3f8;
+	padding-top: 0.35rem;
+}
+
+.vplens-product-price {
+	font-size: 0.95rem;
+	font-weight: 700;
+	color: #102033;
+}
+
+.vplens-product-price del {
+	font-size: 0.85rem;
+	color: #868e96;
+	font-weight: 400;
+	margin-right: 0.25rem;
+}
+
+.vplens-product-price ins {
+	text-decoration: none;
+	color: #e64980;
+}
+
+.vplens-stock {
+	font-size: 0.75rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.025em;
+}
+
+.vplens-stock--instock {
+	color: #12b886;
+}
+
+.vplens-stock--outofstock {
+	color: #fa5252;
+}
+
+/* View All Link */
+.vplens-ajax-search-result--view-all {
+	border-style: dashed;
+	background: #f8fafc;
+	text-align: center;
+}
+
+.vplens-ajax-search-link--view-all {
+	display: block;
+	justify-content: center;
+	font-weight: 700;
+	color: #0b7285;
+}
+
+.vplens-ajax-search-link--view-all:hover {
+	color: #0f9bb0;
+}
+
+/* Focus Overlay Backdrop */
+.vplens-search-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background-color: rgba(16, 32, 51, 0.4);
+	backdrop-filter: blur(4px);
+	z-index: 99998;
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 0.25s ease;
+}
+
+.vplens-search-overlay.is-active {
+	opacity: 1;
+	pointer-events: auto;
+}
+
+/* Ensure autocomplete list is drawn above focus overlay */
+.vplens-ajax-search-results-wrap {
+	position: relative;
+	z-index: 99999;
+}

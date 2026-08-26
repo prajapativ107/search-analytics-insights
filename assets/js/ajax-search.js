@@ -36,8 +36,9 @@
 			return;
 		}
 
+		const showLoader = '0' !== wrapper.getAttribute('data-wc-show-loader');
 		status.textContent = message;
-		status.classList.toggle('is-loading', Boolean(isLoading));
+		status.classList.toggle('is-loading', Boolean(isLoading && showLoader));
 		status.style.display = isLoading || message ? 'block' : 'none';
 	}
 
@@ -46,6 +47,21 @@
 
 		if (resultsWrap) {
 			resultsWrap.style.display = isVisible ? 'block' : 'none';
+		}
+
+		const wcFocusOverlay = '1' === wrapper.getAttribute('data-wc-focus-overlay');
+		if (wcFocusOverlay) {
+			let overlay = document.querySelector('.vplens-search-overlay');
+			if (isVisible) {
+				if (!overlay) {
+					overlay = document.createElement('div');
+					overlay.className = 'vplens-search-overlay';
+					document.body.appendChild(overlay);
+				}
+				overlay.classList.add('is-active');
+			} else if (overlay) {
+				overlay.classList.remove('is-active');
+			}
 		}
 	}
 
@@ -77,6 +93,16 @@
 		const showPostTypeLabel = '1' === wrapper.getAttribute('data-show-post-type-label');
 		const state = getState(wrapper);
 
+		const wcEnabled = '1' === wrapper.getAttribute('data-wc-enabled');
+		const wcShowPrice = '1' === wrapper.getAttribute('data-wc-show-price');
+		const wcShowStock = '1' === wrapper.getAttribute('data-wc-show-stock');
+		const wcShowSku = '1' === wrapper.getAttribute('data-wc-show-sku');
+		const wcShowSale = '1' === wrapper.getAttribute('data-wc-show-sale');
+		const wcShowFeatured = '1' === wrapper.getAttribute('data-wc-show-featured');
+		const wcShowViewAll = '1' === wrapper.getAttribute('data-wc-show-view-all');
+		const wcViewAllLabel = wrapper.getAttribute('data-wc-view-all-label') || 'See all results';
+		const searchId = wrapper.getAttribute('data-last-search-id') || '';
+
 		if (!results || !input) {
 			return;
 		}
@@ -93,52 +119,171 @@
 
 		items.forEach(
 			function (item, index) {
-				const li = document.createElement('li');
-				const link = document.createElement('a');
-				const imageWrap = document.createElement('span');
-				const title = document.createElement('span');
-				const meta = document.createElement('span');
+				if (item.post_type === 'product' && wcEnabled) {
+					const li = document.createElement('li');
+					const link = document.createElement('a');
+					const imageWrap = document.createElement('span');
+					const detailsWrap = document.createElement('span');
+					const title = document.createElement('span');
 
-				li.className = 'vplens-ajax-search-result';
-				li.setAttribute('role', 'option');
-				li.id = 'vplens-ajax-search-option-' + index;
+					li.className = 'vplens-ajax-search-result vplens-ajax-search-result--product';
+					li.setAttribute('role', 'option');
+					li.id = 'vplens-ajax-search-option-' + index;
 
-				link.className = 'vplens-ajax-search-link';
-				link.href = item.url || '#';
-				link.tabIndex = -1;
+					link.className = 'vplens-ajax-search-link';
+					link.href = item.url || '#';
+					link.tabIndex = -1;
+					link.setAttribute('data-post-id', item.id);
+					link.setAttribute('data-search-id', searchId);
 
-				imageWrap.className = 'vplens-ajax-search-image-wrap';
+					imageWrap.className = 'vplens-ajax-search-image-wrap';
+					if (showFeaturedImages && item.featured_image) {
+						const image = document.createElement('img');
+						image.className = 'vplens-ajax-search-image';
+						image.src = item.featured_image;
+						image.alt = '';
+						image.loading = 'lazy';
+						image.decoding = 'async';
+						image.setAttribute('aria-hidden', 'true');
+						imageWrap.appendChild(image);
+						link.classList.add('has-featured-image');
+					}
 
-				if (showFeaturedImages && item.featured_image) {
-					const image = document.createElement('img');
-					image.className = 'vplens-ajax-search-image';
-					image.src = item.featured_image;
-					image.alt = '';
-					image.loading = 'lazy';
-					image.decoding = 'async';
-					image.setAttribute('aria-hidden', 'true');
-					imageWrap.appendChild(image);
-					link.classList.add('has-featured-image');
+					detailsWrap.className = 'vplens-ajax-search-details';
+
+					title.className = 'vplens-ajax-search-title';
+					title.textContent = item.title || '';
+					detailsWrap.appendChild(title);
+
+					const badgesWrap = document.createElement('span');
+					badgesWrap.className = 'vplens-product-badges';
+					if (wcShowSale && item.is_on_sale) {
+						const badge = document.createElement('span');
+						badge.className = 'vplens-badge vplens-badge--sale';
+						badge.textContent = 'Sale';
+						badgesWrap.appendChild(badge);
+					}
+					if (wcShowFeatured && item.is_featured) {
+						const badge = document.createElement('span');
+						badge.className = 'vplens-badge vplens-badge--featured';
+						badge.textContent = 'Featured';
+						badgesWrap.appendChild(badge);
+					}
+					if (badgesWrap.childNodes.length) {
+						detailsWrap.appendChild(badgesWrap);
+					}
+
+					const metaRow = document.createElement('span');
+					metaRow.className = 'vplens-product-meta-row';
+
+					if (wcShowSku && item.sku) {
+						const sku = document.createElement('span');
+						sku.className = 'vplens-product-sku';
+						sku.textContent = 'SKU: ' + item.sku;
+						metaRow.appendChild(sku);
+					}
+
+					if (item.category) {
+						const cat = document.createElement('span');
+						cat.className = 'vplens-product-cat';
+						cat.textContent = item.category;
+						metaRow.appendChild(cat);
+					}
+
+					if (metaRow.childNodes.length) {
+						detailsWrap.appendChild(metaRow);
+					}
+
+					const priceStockRow = document.createElement('span');
+					priceStockRow.className = 'vplens-product-price-stock-row';
+
+					if (wcShowPrice && item.price_html) {
+						const price = document.createElement('span');
+						price.className = 'vplens-product-price';
+						price.innerHTML = item.price_html;
+						priceStockRow.appendChild(price);
+					}
+
+					if (wcShowStock && item.stock_status) {
+						const stock = document.createElement('span');
+						stock.className = 'vplens-stock vplens-stock--' + item.stock_status;
+						stock.textContent = item.stock_status === 'instock' ? 'In stock' : 'Out of stock';
+						priceStockRow.appendChild(stock);
+					}
+
+					if (priceStockRow.childNodes.length) {
+						detailsWrap.appendChild(priceStockRow);
+					}
+
+					if (imageWrap.childNodes.length) {
+						link.appendChild(imageWrap);
+					}
+					link.appendChild(detailsWrap);
+					li.appendChild(link);
+					results.appendChild(li);
+				} else {
+					const li = document.createElement('li');
+					const link = document.createElement('a');
+					const imageWrap = document.createElement('span');
+					const title = document.createElement('span');
+					const meta = document.createElement('span');
+
+					li.className = 'vplens-ajax-search-result';
+					li.setAttribute('role', 'option');
+					li.id = 'vplens-ajax-search-option-' + index;
+
+					link.className = 'vplens-ajax-search-link';
+					link.href = item.url || '#';
+					link.tabIndex = -1;
+					link.setAttribute('data-post-id', item.id);
+					link.setAttribute('data-search-id', searchId);
+
+					imageWrap.className = 'vplens-ajax-search-image-wrap';
+
+					if (showFeaturedImages && item.featured_image) {
+						const image = document.createElement('img');
+						image.className = 'vplens-ajax-search-image';
+						image.src = item.featured_image;
+						image.alt = '';
+						image.loading = 'lazy';
+						image.decoding = 'async';
+						image.setAttribute('aria-hidden', 'true');
+						imageWrap.appendChild(image);
+						link.classList.add('has-featured-image');
+					}
+
+					title.className = 'vplens-ajax-search-title';
+					title.textContent = item.title || '';
+
+					if (imageWrap.childNodes.length) {
+						link.appendChild(imageWrap);
+					}
+					link.appendChild(title);
+
+					if (showPostTypeLabel && item.post_type_label) {
+						meta.className = 'vplens-ajax-search-meta';
+						meta.textContent = item.post_type_label;
+						link.appendChild(meta);
+					}
+
+					li.appendChild(link);
+					results.appendChild(li);
 				}
-
-				title.className = 'vplens-ajax-search-title';
-				title.textContent = item.title || '';
-
-				if (imageWrap.childNodes.length) {
-					link.appendChild(imageWrap);
-				}
-				link.appendChild(title);
-
-				if (showPostTypeLabel && item.post_type_label) {
-					meta.className = 'vplens-ajax-search-meta';
-					meta.textContent = item.post_type_label;
-					link.appendChild(meta);
-				}
-
-				li.appendChild(link);
-				results.appendChild(li);
 			}
 		);
+
+		if (wcEnabled && wcShowViewAll && items.length > 0) {
+			const viewAllLi = document.createElement('li');
+			const viewAllLink = document.createElement('a');
+
+			viewAllLi.className = 'vplens-ajax-search-result vplens-ajax-search-result--view-all';
+			viewAllLink.className = 'vplens-ajax-search-link vplens-ajax-search-link--view-all';
+			viewAllLink.textContent = wcViewAllLabel;
+			viewAllLink.href = wrapper.querySelector('.vplens-ajax-search-form').action + '?s=' + encodeURIComponent(input.value.trim()) + '&post_type=product';
+			
+			viewAllLi.appendChild(viewAllLink);
+			results.appendChild(viewAllLi);
+		}
 
 		input.setAttribute('aria-expanded', 'true');
 		setResultsVisibility(wrapper, true);
@@ -232,11 +377,10 @@
 			)
 			.then(
 				function (data) {
-					if (!data || !data.success) {
-						clearResults(wrapper);
-						setStatus(wrapper, data && data.data && data.data.message ? data.data.message : strings.error, false);
-						setResultsVisibility(wrapper, false);
-						return;
+					if (data.data && data.data.search_id) {
+						wrapper.setAttribute('data-last-search-id', data.data.search_id);
+					} else {
+						wrapper.removeAttribute('data-last-search-id');
 					}
 
 					const items = data.data && Array.isArray(data.data.items) ? data.data.items : [];
@@ -334,6 +478,39 @@
 			}
 		);
 
+		function trackClick(searchId, postId) {
+			const ajaxUrl = wrapper.getAttribute('data-ajax-url');
+			const nonce = wrapper.getAttribute('data-nonce');
+			const clickAction = wrapper.getAttribute('data-click-action') || 'vplens_click';
+
+			if (!ajaxUrl || !nonce || !searchId || !postId) {
+				return;
+			}
+
+			const params = new URLSearchParams();
+			params.append('action', clickAction);
+			params.append('nonce', nonce);
+			params.append('search_id', searchId);
+			params.append('post_id', postId);
+
+			if (navigator.sendBeacon) {
+				navigator.sendBeacon(ajaxUrl, params);
+			} else {
+				fetch(
+					ajaxUrl,
+					{
+						method: 'POST',
+						credentials: 'same-origin',
+						headers: {
+							'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+						},
+						body: params.toString(),
+						keepalive: true
+					}
+				).catch(function () {});
+			}
+		}
+
 		form.addEventListener(
 			'submit',
 			function (event) {
@@ -345,6 +522,11 @@
 				const link = activeResult ? activeResult.querySelector('a') : null;
 
 				if (link && link.href) {
+					const postId = link.getAttribute('data-post-id');
+					const searchId = link.getAttribute('data-search-id');
+					if (postId && searchId) {
+						trackClick(searchId, postId);
+					}
 					window.location.href = link.href;
 					return;
 				}
@@ -359,6 +541,11 @@
 				const link = event.target.closest('.vplens-ajax-search-link');
 
 				if (link) {
+					const postId = link.getAttribute('data-post-id');
+					const searchId = link.getAttribute('data-search-id');
+					if (postId && searchId) {
+						trackClick(searchId, postId);
+					}
 					clearResults(wrapper);
 					hideResultsUI(wrapper);
 				}
@@ -368,7 +555,7 @@
 		document.addEventListener(
 			'click',
 			function (event) {
-				if (!wrapper.contains(event.target)) {
+				if (!wrapper.contains(event.target) || event.target.classList.contains('vplens-search-overlay')) {
 					clearResults(wrapper);
 					hideResultsUI(wrapper);
 				}

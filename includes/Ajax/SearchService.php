@@ -52,7 +52,14 @@ final class SearchService {
 			);
 		}
 
-		$post_types         = $this->settings->get_searchable_post_types();
+		$wc_settings = $this->settings->get_woocommerce_settings();
+		$post_types  = $this->settings->get_searchable_post_types();
+		if ( class_exists( 'WooCommerce' ) && ! empty( $wc_settings['enabled'] ) ) {
+			if ( ! in_array( 'product', $post_types, true ) ) {
+				$post_types[] = 'product';
+			}
+		}
+
 		$results            = $this->repository->search_content( $search_term, $post_types, $limit, $this->settings->get_show_featured_images() );
 		$matched_post_types = array_values(
 			array_unique(
@@ -73,13 +80,45 @@ final class SearchService {
 		$items = array();
 
 		foreach ( isset( $results['items'] ) && is_array( $results['items'] ) ? $results['items'] : array() as $item ) {
-			$items[] = array(
-				'id'              => isset( $item['id'] ) ? absint( $item['id'] ) : 0,
-				'title'           => isset( $item['title'] ) ? sanitize_text_field( (string) $item['title'] ) : '',
-				'url'             => isset( $item['url'] ) ? esc_url_raw( (string) $item['url'] ) : '',
-				'featured_image'  => isset( $item['featured_image'] ) ? esc_url_raw( (string) $item['featured_image'] ) : '',
-				'post_type'       => isset( $item['post_type'] ) ? sanitize_key( (string) $item['post_type'] ) : '',
-				'post_type_label' => isset( $item['post_type'] ) ? $this->get_post_type_label( (string) $item['post_type'] ) : '',
+			$product_data = array();
+
+			if ( 'product' === $item['post_type'] && class_exists( 'WooCommerce' ) ) {
+				$product = wc_get_product( $item['id'] );
+				if ( $product ) {
+					if ( ! empty( $wc_settings['show_price'] ) ) {
+						$product_data['price_html'] = $product->get_price_html();
+					}
+					if ( ! empty( $wc_settings['show_sku'] ) ) {
+						$product_data['sku'] = $product->get_sku();
+					}
+					if ( ! empty( $wc_settings['show_stock'] ) ) {
+						$product_data['stock_status'] = $product->get_stock_status(); // instock or outofstock
+					}
+					if ( ! empty( $wc_settings['show_sale_badge'] ) ) {
+						$product_data['is_on_sale'] = $product->is_on_sale();
+					}
+					if ( ! empty( $wc_settings['show_featured_badge'] ) ) {
+						$product_data['is_featured'] = $product->is_featured();
+					}
+
+					// Product categories name list
+					$cats = wp_get_post_terms( $item['id'], 'product_cat', array( 'fields' => 'names' ) );
+					if ( ! empty( $cats ) && ! is_wp_error( $cats ) ) {
+						$product_data['category'] = implode( ', ', $cats );
+					}
+				}
+			}
+
+			$items[] = array_merge(
+				array(
+					'id'              => isset( $item['id'] ) ? absint( $item['id'] ) : 0,
+					'title'           => isset( $item['title'] ) ? sanitize_text_field( (string) $item['title'] ) : '',
+					'url'             => isset( $item['url'] ) ? esc_url_raw( (string) $item['url'] ) : '',
+					'featured_image'  => isset( $item['featured_image'] ) ? esc_url_raw( (string) $item['featured_image'] ) : '',
+					'post_type'       => isset( $item['post_type'] ) ? sanitize_key( (string) $item['post_type'] ) : '',
+					'post_type_label' => isset( $item['post_type'] ) ? $this->get_post_type_label( (string) $item['post_type'] ) : '',
+				),
+				$product_data
 			);
 		}
 

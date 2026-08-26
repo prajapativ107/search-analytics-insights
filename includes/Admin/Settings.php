@@ -22,6 +22,7 @@ final class Settings {
 	private const SECTION_SEARCH_RESULTS          = 'vplens_search_results';
 	private const SECTION_SEARCH_SOURCES          = 'vplens_search_sources';
 	private const SECTION_ANALYTICS               = 'vplens_analytics';
+	private const SECTION_WOOCOMMERCE             = 'vplens_woocommerce';
 	private const DEFAULT_PLACEHOLDER             = 'Search posts and pages...';
 	private const DEFAULT_BUTTON_TEXT             = 'Search';
 	private const DEFAULT_NO_RESULTS_MESSAGE      = 'No results found.';
@@ -233,6 +234,37 @@ final class Settings {
 			array( $this, 'render_search_retention_period_field' ),
 			self::PAGE_SLUG,
 			self::SECTION_ANALYTICS
+		);
+
+		add_settings_section(
+			self::SECTION_WOOCOMMERCE,
+			__( 'WooCommerce Search Settings', 'search-analytics-insights' ),
+			array( $this, 'render_woocommerce_section_description' ),
+			self::PAGE_SLUG
+		);
+
+		add_settings_field(
+			'wc_enabled',
+			__( 'Enable WooCommerce Search', 'search-analytics-insights' ),
+			array( $this, 'render_wc_enabled_field' ),
+			self::PAGE_SLUG,
+			self::SECTION_WOOCOMMERCE
+		);
+
+		add_settings_field(
+			'wc_search_fields',
+			__( 'Search Fields', 'search-analytics-insights' ),
+			array( $this, 'render_wc_search_fields_field' ),
+			self::PAGE_SLUG,
+			self::SECTION_WOOCOMMERCE
+		);
+
+		add_settings_field(
+			'wc_display_options',
+			__( 'Display Options', 'search-analytics-insights' ),
+			array( $this, 'render_wc_display_options_field' ),
+			self::PAGE_SLUG,
+			self::SECTION_WOOCOMMERCE
 		);
 	}
 
@@ -809,6 +841,7 @@ final class Settings {
 			'search_results' => $this->sanitize_search_results_settings( $value['search_results'] ?? array() ),
 			'search_sources' => $this->sanitize_search_sources_settings( $value['search_sources'] ?? array() ),
 			'analytics'      => $this->sanitize_analytics_settings( $value['analytics'] ?? array() ),
+			'woocommerce'    => $this->sanitize_woocommerce_settings( $value['woocommerce'] ?? array() ),
 		);
 	}
 
@@ -929,6 +962,19 @@ final class Settings {
 				'track_logged_in_users'   => false,
 				'track_guests'            => true,
 				'search_retention_period' => self::DEFAULT_SEARCH_RETENTION_PERIOD,
+			),
+			'woocommerce'    => array(
+				'enabled'             => true,
+				'search_fields'       => array( 'title', 'sku', 'short_desc', 'desc', 'category', 'tag' ),
+				'show_price'          => true,
+				'show_stock'          => true,
+				'show_sku'            => true,
+				'show_sale_badge'     => true,
+				'show_featured_badge' => true,
+				'show_view_all'       => true,
+				'view_all_label'      => 'See all results',
+				'show_loader'         => true,
+				'focus_overlay'       => true,
 			),
 		);
 	}
@@ -1204,5 +1250,220 @@ final class Settings {
 		$value = sanitize_textarea_field( (string) $value );
 
 		return '' === $value ? self::DEFAULT_NO_RESULTS_MESSAGE : $value;
+	}
+
+	/**
+	 * Get WooCommerce settings.
+	 *
+	 * @return array
+	 */
+	public function get_woocommerce_settings(): array {
+		$settings = $this->get_settings();
+
+		return $settings['woocommerce'] ?? array(
+			'enabled'             => true,
+			'search_fields'       => array( 'title', 'sku', 'short_desc', 'desc', 'category', 'tag' ),
+			'show_price'          => true,
+			'show_stock'          => true,
+			'show_sku'            => true,
+			'show_sale_badge'     => true,
+			'show_featured_badge' => true,
+			'show_view_all'       => true,
+			'view_all_label'      => 'See all results',
+			'show_loader'         => true,
+			'focus_overlay'       => true,
+		);
+	}
+
+	/**
+	 * Check if WooCommerce is active.
+	 *
+	 * @return bool
+	 */
+	public function is_woocommerce_active(): bool {
+		return class_exists( 'WooCommerce' );
+	}
+
+	/**
+	 * Render WooCommerce section description.
+	 *
+	 * @return void
+	 */
+	public function render_woocommerce_section_description(): void {
+		echo '<p>' . esc_html__( 'Configure search behaviors and display options specifically for WooCommerce products.', 'search-analytics-insights' ) . '</p>';
+		if ( ! $this->is_woocommerce_active() ) {
+			echo '<div class="notice notice-warning inline" style="margin: 0 0 15px 0; padding: 8px 12px; border-left-color: #dba617; background: #fcf8e3;"><p style="margin: 0; font-weight: 600;">' . esc_html__( 'Warning: WooCommerce is currently inactive. Product search features will remain disabled on the frontend.', 'search-analytics-insights' ) . '</p></div>';
+		}
+	}
+
+	/**
+	 * Render WooCommerce enabled toggle.
+	 *
+	 * @return void
+	 */
+	public function render_wc_enabled_field(): void {
+		$settings = $this->get_woocommerce_settings();
+		$disabled = ! $this->is_woocommerce_active();
+		?>
+		<label class="vplens-toggle" for="vplens-wc-enabled">
+			<input
+				id="vplens-wc-enabled"
+				type="checkbox"
+				name="<?php echo esc_attr( $this->field_name( 'woocommerce', 'enabled' ) ); ?>"
+				value="1"
+				<?php checked( ! $disabled && ! empty( $settings['enabled'] ) ); ?>
+				<?php disabled( $disabled ); ?>
+			/>
+			<span><?php esc_html_e( 'Enable WooCommerce product search integration.', 'search-analytics-insights' ); ?></span>
+		</label>
+		<?php
+	}
+
+	/**
+	 * Render WooCommerce search fields checkboxes.
+	 *
+	 * @return void
+	 */
+	public function render_wc_search_fields_field(): void {
+		$settings = $this->get_woocommerce_settings();
+		$disabled = ! $this->is_woocommerce_active();
+		$fields   = array(
+			'title'      => __( 'Product Title', 'search-analytics-insights' ),
+			'sku'        => __( 'Product SKU (and variation SKU)', 'search-analytics-insights' ),
+			'short_desc' => __( 'Short Description', 'search-analytics-insights' ),
+			'desc'       => __( 'Full Description', 'search-analytics-insights' ),
+			'category'   => __( 'Product Category', 'search-analytics-insights' ),
+			'tag'        => __( 'Product Tag', 'search-analytics-insights' ),
+			'attributes' => __( 'Product Attributes (Global)', 'search-analytics-insights' ),
+		);
+		$selected = $settings['search_fields'] ?? array();
+
+		echo '<fieldset class="vplens-post-types-fieldset">';
+		foreach ( $fields as $key => $label ) {
+			$checked = in_array( $key, $selected, true );
+			?>
+			<label class="vplens-post-type-option" for="vplens-wc-field-<?php echo esc_attr( $key ); ?>">
+				<input
+					id="vplens-wc-field-<?php echo esc_attr( $key ); ?>"
+					type="checkbox"
+					name="<?php echo esc_attr( $this->field_name( 'woocommerce', 'search_fields' ) ); ?>[]"
+					value="<?php echo esc_attr( $key ); ?>"
+					<?php checked( ! $disabled && $checked ); ?>
+					<?php disabled( $disabled ); ?>
+				/>
+				<span><?php echo esc_html( $label ); ?></span>
+			</label>
+			<?php
+		}
+		echo '</fieldset>';
+	}
+
+	/**
+	 * Render WooCommerce display options checkboxes.
+	 *
+	 * @return void
+	 */
+	public function render_wc_display_options_field(): void {
+		$settings = $this->get_woocommerce_settings();
+		$disabled = ! $this->is_woocommerce_active();
+
+		$options = array(
+			'show_price'          => __( 'Show product price', 'search-analytics-insights' ),
+			'show_stock'          => __( 'Show stock status (In stock / Out of stock)', 'search-analytics-insights' ),
+			'show_sku'            => __( 'Show product SKU', 'search-analytics-insights' ),
+			'show_sale_badge'     => __( 'Show "Sale" badge', 'search-analytics-insights' ),
+			'show_featured_badge' => __( 'Show "Featured" badge', 'search-analytics-insights' ),
+			'show_loader'         => __( 'Show visual loading indicator during AJAX search requests', 'search-analytics-insights' ),
+			'focus_overlay'       => __( 'Show focus overlay (dim page when suggestion dropdown is open)', 'search-analytics-insights' ),
+		);
+
+		echo '<fieldset class="vplens-post-types-fieldset">';
+		foreach ( $options as $key => $label ) {
+			$checked = ! empty( $settings[ $key ] );
+			?>
+			<label class="vplens-post-type-option" style="display: block; margin-bottom: 8px;" for="vplens-wc-option-<?php echo esc_attr( $key ); ?>">
+				<input
+					id="vplens-wc-option-<?php echo esc_attr( $key ); ?>"
+					type="checkbox"
+					name="<?php echo esc_attr( $this->field_name( 'woocommerce', $key ) ); ?>"
+					value="1"
+					<?php checked( ! $disabled && $checked ); ?>
+					<?php disabled( $disabled ); ?>
+				/>
+				<span><?php echo esc_html( $label ); ?></span>
+			</label>
+			<?php
+		}
+		echo '</fieldset>';
+
+		// Render View All option text box
+		$show_view_all = ! empty( $settings['show_view_all'] );
+		$view_all_lbl  = $settings['view_all_label'] ?? 'See all results';
+		?>
+		<div style="margin-top: 15px;">
+			<label class="vplens-post-type-option" for="vplens-wc-option-show_view_all">
+				<input
+					id="vplens-wc-option-show_view_all"
+					type="checkbox"
+					name="<?php echo esc_attr( $this->field_name( 'woocommerce', 'show_view_all' ) ); ?>"
+					value="1"
+					<?php checked( ! $disabled && $show_view_all ); ?>
+					<?php disabled( $disabled ); ?>
+				/>
+				<span><?php esc_html_e( 'Show "See All Results" link at the bottom of suggestion box.', 'search-analytics-insights' ); ?></span>
+			</label>
+			<div style="margin: 8px 0 0 25px;">
+				<label for="vplens-wc-view-all-label"><?php esc_html_e( 'Link Label:', 'search-analytics-insights' ); ?></label>
+				<input
+					id="vplens-wc-view-all-label"
+					type="text"
+					class="regular-text"
+					style="width: 200px; height: 28px; font-size: 13px;"
+					name="<?php echo esc_attr( $this->field_name( 'woocommerce', 'view_all_label' ) ); ?>"
+					value="<?php echo esc_attr( $view_all_lbl ); ?>"
+					<?php disabled( $disabled || ! $show_view_all ); ?>
+				/>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Sanitize the WooCommerce settings.
+	 *
+	 * @param mixed $value Raw section value.
+	 *
+	 * @return array
+	 */
+	private function sanitize_woocommerce_settings( $value ): array {
+		$value = is_array( $value ) ? $value : array();
+
+		$allowed_fields = array( 'title', 'sku', 'short_desc', 'desc', 'category', 'tag', 'attributes' );
+		$search_fields  = array();
+		if ( isset( $value['search_fields'] ) && is_array( $value['search_fields'] ) ) {
+			foreach ( $value['search_fields'] as $field ) {
+				$field = sanitize_key( $field );
+				if ( in_array( $field, $allowed_fields, true ) ) {
+					$search_fields[] = $field;
+				}
+			}
+		}
+		if ( empty( $search_fields ) ) {
+			$search_fields = array( 'title', 'sku' );
+		}
+
+		return array(
+			'enabled'             => ! empty( $value['enabled'] ),
+			'search_fields'       => $search_fields,
+			'show_price'          => ! empty( $value['show_price'] ),
+			'show_stock'          => ! empty( $value['show_stock'] ),
+			'show_sku'            => ! empty( $value['show_sku'] ),
+			'show_sale_badge'     => ! empty( $value['show_sale_badge'] ),
+			'show_featured_badge' => ! empty( $value['show_featured_badge'] ),
+			'show_view_all'       => ! empty( $value['show_view_all'] ),
+			'view_all_label'      => sanitize_text_field( $value['view_all_label'] ?? 'See all results' ),
+			'show_loader'         => ! empty( $value['show_loader'] ),
+			'focus_overlay'       => ! empty( $value['focus_overlay'] ),
+		);
 	}
 }

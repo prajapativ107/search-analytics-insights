@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
  * Central plugin constants and shared keys.
  */
 final class Constants {
-	public const VERSION                      = '1.0.0';
+	public const VERSION                      = '1.1.0';
 	public const TEXT_DOMAIN                  = 'search-analytics-insights';
 	public const OPTION_SCHEMA_VERSION        = 'vplens_schema_version';
 	public const OPTION_PLUGIN_VERSION        = 'vplens_plugin_version';
@@ -23,10 +23,12 @@ final class Constants {
 	public const NONCE_ACTION                 = 'vplens_action';
 	public const NONCE_NAME                   = 'vplens_nonce';
 	public const AJAX_ACTION_SEARCH           = 'vplens_search';
+	public const AJAX_ACTION_CLICK            = 'vplens_click';
 	public const SOURCE_AJAX_SEARCH           = 'ajax_search';
 	public const SOURCE_WORDPRESS_SEARCH      = 'wordpress_search';
 	public const CAPABILITY                   = 'manage_options';
 	public const TABLE_SUFFIX                 = 'vplens_searches';
+	public const TABLE_CLICKS_SUFFIX          = 'vplens_search_clicks';
 
 	/**
 	 * Get the full database table name.
@@ -39,6 +41,19 @@ final class Constants {
 		global $wpdb;
 
 		return $wpdb->prefix . self::TABLE_SUFFIX;
+	}
+
+	/**
+	 * Get the full database clicks table name.
+	 *
+	 * @global \wpdb $wpdb WordPress database abstraction object.
+	 *
+	 * @return string
+	 */
+	public static function table_clicks_name(): string {
+		global $wpdb;
+
+		return $wpdb->prefix . self::TABLE_CLICKS_SUFFIX;
 	}
 
 	/**
