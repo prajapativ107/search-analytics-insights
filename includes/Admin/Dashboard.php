@@ -58,6 +58,7 @@ final class Dashboard {
 						<?php $this->render_summary_card( __( 'Total Searches', 'search-analytics-insights' ), (int) $summary['total_searches'] ); ?>
 						<?php $this->render_summary_card( __( 'Unique Searches', 'search-analytics-insights' ), (int) $summary['unique_searches'] ); ?>
 						<?php $this->render_summary_card( __( 'No Results', 'search-analytics-insights' ), (int) $summary['no_result_searches'] ); ?>
+						<?php $this->render_summary_card( __( 'Search CTR', 'search-analytics-insights' ), number_format( $summary['ctr'] ?? 0, 1 ) . '%' ); ?>
 					</div>
 				</div>
 				
@@ -167,13 +168,15 @@ final class Dashboard {
 		$top_pages_by_title              = $this->analytics_service->get_top_pages_by_title( $filters, 10 );
 		$top_pages_by_url                = $this->analytics_service->get_top_pages_by_url( $filters, 10 );
 		$searches_by_page_type           = $this->analytics_service->get_searches_by_page_type( $filters, 10 );
+		$most_clicked_products           = $this->analytics_service->get_most_clicked_products( $filters, 10 );
+		$search_perf                     = $this->analytics_service->get_search_performance( $filters, 10 );
 
 		$total_pages = max( 1, (int) ceil( $aggregated_activity['total'] / $filters['per_page'] ) );
 		$page        = min( $filters['page'], $total_pages );
 
 		$this->render_tabbed_page(
 			'analytics',
-			function () use ( $filters, $summary, $aggregated_activity, $recent_activity, $top_terms, $no_result_terms, $daily_counts, $total_pages, $page, $top_pages_by_title, $top_pages_by_url, $searches_by_page_type ) {
+			function () use ( $filters, $summary, $aggregated_activity, $recent_activity, $top_terms, $no_result_terms, $daily_counts, $total_pages, $page, $top_pages_by_title, $top_pages_by_url, $searches_by_page_type, $most_clicked_products, $search_perf ) {
 				?>
 			<div class="vplens-filters-card" aria-labelledby="vplens-filters-card-title">
 				<div class="vplens-filters-header">
@@ -381,6 +384,7 @@ final class Dashboard {
 				<?php $this->render_summary_card( __( 'Total Searches', 'search-analytics-insights' ), (int) $summary['total_searches'] ); ?>
 				<?php $this->render_summary_card( __( 'Unique Searches', 'search-analytics-insights' ), (int) $summary['unique_searches'] ); ?>
 				<?php $this->render_summary_card( __( 'No Result Searches', 'search-analytics-insights' ), (int) $summary['no_result_searches'] ); ?>
+				<?php $this->render_summary_card( __( 'Search CTR', 'search-analytics-insights' ), number_format( $summary['ctr'] ?? 0, 1 ) . '%' ); ?>
 			</div>
 
 			<div class="vplens-summary">
@@ -409,22 +413,26 @@ final class Dashboard {
 				</div>
 
 				<div class="vplens-panel">
-					<h2><?php esc_html_e( 'Top Search Terms', 'search-analytics-insights' ); ?></h2>
+					<h2><?php esc_html_e( 'Search Performance (CTR)', 'search-analytics-insights' ); ?></h2>
 					<table class="widefat striped">
 						<thead>
 							<tr>
-								<th><?php esc_html_e( 'Search Term', 'search-analytics-insights' ); ?></th>
+								<th><?php esc_html_e( 'Search Keyword', 'search-analytics-insights' ); ?></th>
 								<th><?php esc_html_e( 'Searches', 'search-analytics-insights' ); ?></th>
+								<th><?php esc_html_e( 'Clicked', 'search-analytics-insights' ); ?></th>
+								<th><?php esc_html_e( 'Search CTR', 'search-analytics-insights' ); ?></th>
 							</tr>
 						</thead>
 						<tbody>
-							<?php if ( empty( $top_terms ) ) : ?>
-								<tr><td colspan="2"><?php esc_html_e( 'No top search terms yet.', 'search-analytics-insights' ); ?></td></tr>
+							<?php if ( empty( $search_perf ) ) : ?>
+								<tr><td colspan="4"><?php esc_html_e( 'No search performance data yet.', 'search-analytics-insights' ); ?></td></tr>
 							<?php else : ?>
-								<?php foreach ( $top_terms as $row ) : ?>
+								<?php foreach ( $search_perf as $row ) : ?>
 									<tr>
-										<td><?php echo esc_html( (string) $row['search_term'] ); ?></td>
+										<td><strong><?php echo esc_html( (string) $row['search_term'] ); ?></strong></td>
 										<td><?php echo esc_html( (string) $row['search_count'] ); ?></td>
+										<td><?php echo esc_html( (string) $row['clicked_searches'] ); ?></td>
+										<td><?php echo esc_html( number_format( $row['ctr'], 1 ) . '%' ); ?></td>
 									</tr>
 								<?php endforeach; ?>
 							<?php endif; ?>
@@ -449,6 +457,40 @@ final class Dashboard {
 									<tr>
 										<td><?php echo esc_html( (string) $row['search_term'] ); ?></td>
 										<td><?php echo esc_html( (string) $row['search_count'] ); ?></td>
+									</tr>
+								<?php endforeach; ?>
+							<?php endif; ?>
+						</tbody>
+					</table>
+				</div>
+			</div>
+
+			<div class="vplens-summary" style="margin-top: 20px;">
+				<div class="vplens-panel" style="grid-column: span 3; width: 100%;">
+					<h2><?php esc_html_e( 'Most Clicked Products from Search', 'search-analytics-insights' ); ?></h2>
+					<table class="widefat striped">
+						<thead>
+							<tr>
+								<th><?php esc_html_e( 'Product Name', 'search-analytics-insights' ); ?></th>
+								<th><?php esc_html_e( 'Total Clicks', 'search-analytics-insights' ); ?></th>
+								<th><?php esc_html_e( 'Unique Searches With Clicks', 'search-analytics-insights' ); ?></th>
+							</tr>
+						</thead>
+						<tbody>
+							<?php if ( empty( $most_clicked_products ) ) : ?>
+								<tr><td colspan="3"><?php esc_html_e( 'No product clicks recorded yet.', 'search-analytics-insights' ); ?></td></tr>
+							<?php else : ?>
+								<?php foreach ( $most_clicked_products as $row ) : ?>
+									<tr>
+										<td>
+											<strong><?php echo esc_html( $row['title'] ); ?></strong>
+											<br />
+											<span class="description" style="font-size: 0.85em; color: #5f6b7a;">
+												<?php echo esc_html__( 'Product ID:', 'search-analytics-insights' ) . ' ' . absint( $row['post_id'] ); ?>
+											</span>
+										</td>
+										<td><?php echo esc_html( (string) $row['click_count'] ); ?></td>
+										<td><?php echo esc_html( (string) $row['unique_searches'] ); ?></td>
 									</tr>
 								<?php endforeach; ?>
 							<?php endif; ?>
@@ -688,13 +730,40 @@ final class Dashboard {
 		$this->render_tabbed_page(
 			'settings',
 			function () {
+				global $wp_settings_sections, $wp_settings_fields;
 				?>
 			<div class="vplens-panel">
 				<h3><?php esc_html_e( 'Search Settings', 'search-analytics-insights' ); ?></h3>
 				<p class="vplens-settings-description"><?php esc_html_e( 'Configure the search form, live results, sources, and analytics in one place.', 'search-analytics-insights' ); ?></p>
 				<form method="post" action="options.php">
 					<?php settings_fields( 'vplens_settings' ); ?>
-					<?php do_settings_sections( 'vplens' ); ?>
+					<?php
+					if ( isset( $wp_settings_sections['vplens'] ) ) {
+						$first = true;
+						foreach ( (array) $wp_settings_sections['vplens'] as $section ) {
+							$active_class = $first ? 'active' : '';
+							echo '<div class="vplens-customizer-section ' . esc_attr( $active_class ) . '">';
+							echo '<h4 class="vplens-customizer-section-title">';
+							echo esc_html( $section['title'] );
+							echo '<span class="dashicons dashicons-arrow-down"></span>';
+							echo '</h4>';
+							echo '<div class="vplens-customizer-section-content">';
+							if ( $section['callback'] ) {
+								call_user_func( $section['callback'], $section );
+							}
+							if ( isset( $wp_settings_fields['vplens'][ $section['id'] ] ) ) {
+								echo '<table class="form-table" role="presentation">';
+								do_settings_fields( 'vplens', $section['id'] );
+								echo '</table>';
+							}
+							echo '</div>';
+							echo '</div>';
+							$first = false;
+						}
+					} else {
+						do_settings_sections( 'vplens' );
+					}
+					?>
 					<?php submit_button( __( 'Save Settings', 'search-analytics-insights' ) ); ?>
 				</form>
 			</div>
@@ -866,6 +935,9 @@ final class Dashboard {
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=vplens-settings' ) ); ?>" class="nav-tab <?php echo 'settings' === $active_tab ? 'nav-tab-active' : ''; ?>">
 					<span class="dashicons dashicons-admin-settings"></span> <?php esc_html_e( 'Search Settings', 'search-analytics-insights' ); ?>
 				</a>
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=vplens-design' ) ); ?>" class="nav-tab <?php echo 'design' === $active_tab ? 'nav-tab-active' : ''; ?>">
+					<span class="dashicons dashicons-admin-appearance"></span> <?php esc_html_e( 'Search Form Design', 'search-analytics-insights' ); ?>
+				</a>
 				<a href="<?php echo esc_url( admin_url( 'admin.php?page=vplens-tools' ) ); ?>" class="nav-tab <?php echo 'tools' === $active_tab ? 'nav-tab-active' : ''; ?>">
 					<span class="dashicons dashicons-admin-tools"></span> <?php esc_html_e( 'Tools', 'search-analytics-insights' ); ?>
 				</a>
@@ -953,12 +1025,12 @@ final class Dashboard {
 	/**
 	 * Render a summary card.
 	 *
-	 * @param string $label Label text.
-	 * @param int    $value Value text.
+	 * @param string     $label Label text.
+	 * @param string|int $value Value text.
 	 *
 	 * @return void
 	 */
-	private function render_summary_card( string $label, int $value ): void {
+	private function render_summary_card( string $label, $value ): void {
 		?>
 		<div class="vplens-card">
 			<span class="vplens-card-label"><?php echo esc_html( $label ); ?></span>
@@ -1084,5 +1156,562 @@ final class Dashboard {
 			</td>
 		</tr>
 		<?php
+	}
+
+	/**
+	 * Render the Search Form Design Customizer page.
+	 *
+	 * @return void
+	 */
+	public function render_design_page(): void {
+		$settings_helper = new \VPLens\Admin\Settings();
+		$design          = $settings_helper->get_design_settings();
+
+		// Fetch existing choices and settings
+		$this->render_tabbed_page(
+			'design',
+			function () use ( $design ) {
+				$current_screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+				?>
+				<!-- Screen ID: <?php echo esc_html( $current_screen ? $current_screen->id : 'unknown' ); ?> -->
+				<div class="vplens-customizer-container">
+					<form method="post" action="options.php" class="vplens-customizer-form">
+						<?php settings_fields( 'vplens_settings' ); ?>
+						
+						<!-- Keep other settings intact -->
+						<?php
+						$all_settings = get_option( 'vplens_settings', array() );
+						foreach ( $all_settings as $section_key => $section_data ) {
+							if ( 'design' === $section_key ) {
+								continue;
+							}
+							if ( is_array( $section_data ) ) {
+								foreach ( $section_data as $field_key => $field_val ) {
+									if ( is_array( $field_val ) ) {
+										foreach ( $field_val as $sub_key => $sub_val ) {
+											echo '<input type="hidden" name="vplens_settings[' . esc_attr( $section_key ) . '][' . esc_attr( $field_key ) . '][' . esc_attr( $sub_key ) . ']" value="' . esc_attr( $sub_val ) . '" />';
+										}
+									} else {
+										echo '<input type="hidden" name="vplens_settings[' . esc_attr( $section_key ) . '][' . esc_attr( $field_key ) . ']" value="' . esc_attr( $field_val ) . '" />';
+									}
+								}
+							}
+						}
+						?>
+
+						<div class="vplens-customizer-sidebar">
+							<div class="vplens-customizer-header">
+								<h3><?php esc_html_e( 'Design Customizer', 'search-analytics-insights' ); ?></h3>
+								<p class="description"><?php esc_html_e( 'Customize search colors, sizing, layout, and results styles.', 'search-analytics-insights' ); ?></p>
+							</div>
+
+							<!-- Category: Search Input -->
+							<div class="vplens-customizer-section active">
+								<h4 class="vplens-customizer-section-title">
+									<?php esc_html_e( 'Search Input', 'search-analytics-insights' ); ?>
+									<span class="dashicons dashicons-arrow-down"></span>
+								</h4>
+								<div class="vplens-customizer-section-content">
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Background Color', 'search-analytics-insights' ); ?></label>
+										<input type="text" class="vplens-color-picker" name="vplens_settings[design][input][bg_color]" value="<?php echo esc_attr( $design['input']['bg_color'] ); ?>" data-default-color="#ffffff" />
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Text Color', 'search-analytics-insights' ); ?></label>
+										<input type="text" class="vplens-color-picker" name="vplens_settings[design][input][text_color]" value="<?php echo esc_attr( $design['input']['text_color'] ); ?>" data-default-color="#102033" />
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Placeholder Color', 'search-analytics-insights' ); ?></label>
+										<input type="text" class="vplens-color-picker" name="vplens_settings[design][input][placeholder_color]" value="<?php echo esc_attr( $design['input']['placeholder_color'] ); ?>" data-default-color="#5f6b7a" />
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Border Color', 'search-analytics-insights' ); ?></label>
+										<input type="text" class="vplens-color-picker" name="vplens_settings[design][input][border_color]" value="<?php echo esc_attr( $design['input']['border_color'] ); ?>" data-default-color="#c8d3df" />
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Border Width (px)', 'search-analytics-insights' ); ?></label>
+										<input type="number" name="vplens_settings[design][input][border_width]" value="<?php echo esc_attr( (string) $design['input']['border_width'] ); ?>" min="0" max="20" class="small-text" />
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Border Radius (px)', 'search-analytics-insights' ); ?></label>
+										<input type="number" name="vplens_settings[design][input][border_radius]" value="<?php echo esc_attr( (string) $design['input']['border_radius'] ); ?>" min="0" max="100" class="small-text" />
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Height (px)', 'search-analytics-insights' ); ?></label>
+										<input type="number" name="vplens_settings[design][input][height]" value="<?php echo esc_attr( (string) $design['input']['height'] ); ?>" min="20" max="120" class="small-text" />
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Font Size (px)', 'search-analytics-insights' ); ?></label>
+										<input type="number" name="vplens_settings[design][input][font_size]" value="<?php echo esc_attr( (string) $design['input']['font_size'] ); ?>" min="8" max="72" class="small-text" />
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Horizontal Padding (px)', 'search-analytics-insights' ); ?></label>
+										<input type="number" name="vplens_settings[design][input][padding]" value="<?php echo esc_attr( (string) $design['input']['padding'] ); ?>" min="0" max="100" class="small-text" />
+									</div>
+								</div>
+							</div>
+
+							<!-- Category: Search Button -->
+							<div class="vplens-customizer-section">
+								<h4 class="vplens-customizer-section-title">
+									<?php esc_html_e( 'Search Button', 'search-analytics-insights' ); ?>
+									<span class="dashicons dashicons-arrow-down"></span>
+								</h4>
+								<div class="vplens-customizer-section-content">
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Background Color', 'search-analytics-insights' ); ?></label>
+										<input type="text" class="vplens-color-picker" name="vplens_settings[design][button][bg_color]" value="<?php echo esc_attr( $design['button']['bg_color'] ); ?>" data-default-color="#0b7285" />
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Hover Background Color', 'search-analytics-insights' ); ?></label>
+										<input type="text" class="vplens-color-picker" name="vplens_settings[design][button][hover_bg_color]" value="<?php echo esc_attr( $design['button']['hover_bg_color'] ); ?>" data-default-color="#0f9bb0" />
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Text Color', 'search-analytics-insights' ); ?></label>
+										<input type="text" class="vplens-color-picker" name="vplens_settings[design][button][text_color]" value="<?php echo esc_attr( $design['button']['text_color'] ); ?>" data-default-color="#ffffff" />
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Button Text', 'search-analytics-insights' ); ?></label>
+										<input type="text" name="vplens_settings[design][button][text]" value="<?php echo esc_attr( $design['button']['text'] ); ?>" />
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Width (auto, 100%, or px value)', 'search-analytics-insights' ); ?></label>
+										<input type="text" name="vplens_settings[design][button][width]" value="<?php echo esc_attr( $design['button']['width'] ); ?>" class="regular-text" />
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Height (px)', 'search-analytics-insights' ); ?></label>
+										<input type="number" name="vplens_settings[design][button][height]" value="<?php echo esc_attr( (string) $design['button']['height'] ); ?>" min="20" max="120" class="small-text" />
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Border Radius (px)', 'search-analytics-insights' ); ?></label>
+										<input type="number" name="vplens_settings[design][button][border_radius]" value="<?php echo esc_attr( (string) $design['button']['border_radius'] ); ?>" min="0" max="100" class="small-text" />
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Font Size (px)', 'search-analytics-insights' ); ?></label>
+										<input type="number" name="vplens_settings[design][button][font_size]" value="<?php echo esc_attr( (string) $design['button']['font_size'] ); ?>" min="8" max="72" class="small-text" />
+									</div>
+									<div class="vplens-control-group inline-checkbox">
+										<label>
+											<input type="checkbox" name="vplens_settings[design][button][show_icon]" value="1" <?php checked( ! empty( $design['button']['show_icon'] ) ); ?> />
+											<?php esc_html_e( 'Show Icon inside Button', 'search-analytics-insights' ); ?>
+										</label>
+									</div>
+								</div>
+							</div>
+
+							<!-- Category: Search Icon -->
+							<div class="vplens-customizer-section">
+								<h4 class="vplens-customizer-section-title">
+									<?php esc_html_e( 'Search Icon (Input)', 'search-analytics-insights' ); ?>
+									<span class="dashicons dashicons-arrow-down"></span>
+								</h4>
+								<div class="vplens-customizer-section-content">
+									<div class="vplens-control-group inline-checkbox">
+										<label>
+											<input type="checkbox" name="vplens_settings[design][icon][show]" value="1" <?php checked( ! empty( $design['icon']['show'] ) ); ?> />
+											<?php esc_html_e( 'Show Search Icon in Input', 'search-analytics-insights' ); ?>
+										</label>
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Icon Color', 'search-analytics-insights' ); ?></label>
+										<input type="text" class="vplens-color-picker" name="vplens_settings[design][icon][color]" value="<?php echo esc_attr( $design['icon']['color'] ); ?>" data-default-color="#5f6b7a" />
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Icon Size (px)', 'search-analytics-insights' ); ?></label>
+										<input type="number" name="vplens_settings[design][icon][size]" value="<?php echo esc_attr( (string) $design['icon']['size'] ); ?>" min="6" max="120" class="small-text" />
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Icon Position', 'search-analytics-insights' ); ?></label>
+										<select name="vplens_settings[design][icon][position]">
+											<option value="right" <?php selected( 'right', $design['icon']['position'] ); ?>><?php esc_html_e( 'Right', 'search-analytics-insights' ); ?></option>
+											<option value="left" <?php selected( 'left', $design['icon']['position'] ); ?>><?php esc_html_e( 'Left', 'search-analytics-insights' ); ?></option>
+										</select>
+									</div>
+								</div>
+							</div>
+
+							<!-- Category: Search Form Layout -->
+							<div class="vplens-customizer-section">
+								<h4 class="vplens-customizer-section-title">
+									<?php esc_html_e( 'Search Form Layout', 'search-analytics-insights' ); ?>
+									<span class="dashicons dashicons-arrow-down"></span>
+								</h4>
+								<div class="vplens-customizer-section-content">
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Layout Type', 'search-analytics-insights' ); ?></label>
+										<select name="vplens_settings[design][layout][type]">
+											<option value="inline" <?php selected( 'inline', $design['layout']['type'] ); ?>><?php esc_html_e( 'Inline (Input + Button)', 'search-analytics-insights' ); ?></option>
+											<option value="full_width" <?php selected( 'full_width', $design['layout']['type'] ); ?>><?php esc_html_e( 'Full Width (Stacked)', 'search-analytics-insights' ); ?></option>
+											<option value="compact" <?php selected( 'compact', $design['layout']['type'] ); ?>><?php esc_html_e( 'Compact (Icon only toggle)', 'search-analytics-insights' ); ?></option>
+										</select>
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Maximum Form Width (px)', 'search-analytics-insights' ); ?></label>
+										<input type="number" name="vplens_settings[design][layout][width]" value="<?php echo esc_attr( (string) $design['layout']['width'] ); ?>" min="10" max="2000" class="regular-text" />
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Input/Button Gap (px)', 'search-analytics-insights' ); ?></label>
+										<input type="number" name="vplens_settings[design][layout][gap]" value="<?php echo esc_attr( (string) $design['layout']['gap'] ); ?>" min="0" max="100" class="small-text" />
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Alignment', 'search-analytics-insights' ); ?></label>
+										<select name="vplens_settings[design][layout][align]">
+											<option value="left" <?php selected( 'left', $design['layout']['align'] ); ?>><?php esc_html_e( 'Left', 'search-analytics-insights' ); ?></option>
+											<option value="center" <?php selected( 'center', $design['layout']['align'] ); ?>><?php esc_html_e( 'Center', 'search-analytics-insights' ); ?></option>
+											<option value="right" <?php selected( 'right', $design['layout']['align'] ); ?>><?php esc_html_e( 'Right', 'search-analytics-insights' ); ?></option>
+										</select>
+									</div>
+								</div>
+							</div>
+
+							<!-- Category: Results Dropdown -->
+							<div class="vplens-customizer-section">
+								<h4 class="vplens-customizer-section-title">
+									<?php esc_html_e( 'Results Dropdown', 'search-analytics-insights' ); ?>
+									<span class="dashicons dashicons-arrow-down"></span>
+								</h4>
+								<div class="vplens-customizer-section-content">
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Background Color', 'search-analytics-insights' ); ?></label>
+										<input type="text" class="vplens-color-picker" name="vplens_settings[design][dropdown][bg_color]" value="<?php echo esc_attr( $design['dropdown']['bg_color'] ); ?>" data-default-color="#ffffff" />
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Border Color', 'search-analytics-insights' ); ?></label>
+										<input type="text" class="vplens-color-picker" name="vplens_settings[design][dropdown][border_color]" value="<?php echo esc_attr( $design['dropdown']['border_color'] ); ?>" data-default-color="#d9e1ea" />
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Border Radius (px)', 'search-analytics-insights' ); ?></label>
+										<input type="number" name="vplens_settings[design][dropdown][border_radius]" value="<?php echo esc_attr( (string) $design['dropdown']['border_radius'] ); ?>" min="0" max="100" class="small-text" />
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Shadow', 'search-analytics-insights' ); ?></label>
+										<select name="vplens_settings[design][dropdown][shadow]">
+											<option value="none" <?php selected( 'none', $design['dropdown']['shadow'] ); ?>><?php esc_html_e( 'None', 'search-analytics-insights' ); ?></option>
+											<option value="low" <?php selected( 'low', $design['dropdown']['shadow'] ); ?>><?php esc_html_e( 'Low shadow', 'search-analytics-insights' ); ?></option>
+											<option value="medium" <?php selected( 'medium', $design['dropdown']['shadow'] ); ?>><?php esc_html_e( 'Medium shadow', 'search-analytics-insights' ); ?></option>
+											<option value="high" <?php selected( 'high', $design['dropdown']['shadow'] ); ?>><?php esc_html_e( 'High shadow', 'search-analytics-insights' ); ?></option>
+										</select>
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Maximum Height (px)', 'search-analytics-insights' ); ?></label>
+										<input type="number" name="vplens_settings[design][dropdown][max_height]" value="<?php echo esc_attr( (string) $design['dropdown']['max_height'] ); ?>" min="100" max="2000" class="regular-text" />
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Result Spacing (px)', 'search-analytics-insights' ); ?></label>
+										<input type="number" name="vplens_settings[design][dropdown][result_spacing]" value="<?php echo esc_attr( (string) $design['dropdown']['result_spacing'] ); ?>" min="0" max="100" class="small-text" />
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Result Padding (px)', 'search-analytics-insights' ); ?></label>
+										<input type="number" name="vplens_settings[design][dropdown][result_padding]" value="<?php echo esc_attr( (string) $design['dropdown']['result_padding'] ); ?>" min="0" max="100" class="small-text" />
+									</div>
+								</div>
+							</div>
+
+							<!-- Category: Product Results -->
+							<div class="vplens-customizer-section">
+								<h4 class="vplens-customizer-section-title">
+									<?php esc_html_e( 'Product Results', 'search-analytics-insights' ); ?>
+									<span class="dashicons dashicons-arrow-down"></span>
+								</h4>
+								<div class="vplens-customizer-section-content">
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Product Thumbnail Size (px)', 'search-analytics-insights' ); ?></label>
+										<input type="number" name="vplens_settings[design][product][image_size]" value="<?php echo esc_attr( (string) $design['product']['image_size'] ); ?>" min="16" max="256" class="small-text" />
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Title Color', 'search-analytics-insights' ); ?></label>
+										<input type="text" class="vplens-color-picker" name="vplens_settings[design][product][title_color]" value="<?php echo esc_attr( $design['product']['title_color'] ); ?>" data-default-color="#102033" />
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Title Font Size (px)', 'search-analytics-insights' ); ?></label>
+										<input type="number" name="vplens_settings[design][product][title_font_size]" value="<?php echo esc_attr( (string) $design['product']['title_font_size'] ); ?>" min="8" max="72" class="small-text" />
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Price Color', 'search-analytics-insights' ); ?></label>
+										<input type="text" class="vplens-color-picker" name="vplens_settings[design][product][price_color]" value="<?php echo esc_attr( $design['product']['price_color'] ); ?>" data-default-color="#102033" />
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'SKU Color', 'search-analytics-insights' ); ?></label>
+										<input type="text" class="vplens-color-picker" name="vplens_settings[design][product][sku_color]" value="<?php echo esc_attr( $design['product']['sku_color'] ); ?>" data-default-color="#5f6b7a" />
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Category Label Color', 'search-analytics-insights' ); ?></label>
+										<input type="text" class="vplens-color-picker" name="vplens_settings[design][product][category_color]" value="<?php echo esc_attr( $design['product']['category_color'] ); ?>" data-default-color="#868e96" />
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Stock Status Color', 'search-analytics-insights' ); ?></label>
+										<input type="text" class="vplens-color-picker" name="vplens_settings[design][product][stock_color]" value="<?php echo esc_attr( $design['product']['stock_color'] ); ?>" data-default-color="#12b886" />
+									</div>
+								</div>
+							</div>
+
+							<!-- Category: Hover States -->
+							<div class="vplens-customizer-section">
+								<h4 class="vplens-customizer-section-title">
+									<?php esc_html_e( 'Result Hover Style', 'search-analytics-insights' ); ?>
+									<span class="dashicons dashicons-arrow-down"></span>
+								</h4>
+								<div class="vplens-customizer-section-content">
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Hover Background Color', 'search-analytics-insights' ); ?></label>
+										<input type="text" class="vplens-color-picker" name="vplens_settings[design][hover][bg_color]" value="<?php echo esc_attr( $design['hover']['bg_color'] ); ?>" data-default-color="#f8fafc" />
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Hover Text Color', 'search-analytics-insights' ); ?></label>
+										<input type="text" class="vplens-color-picker" name="vplens_settings[design][hover][text_color]" value="<?php echo esc_attr( $design['hover']['text_color'] ); ?>" data-default-color="#0b7285" />
+									</div>
+								</div>
+							</div>
+
+							<!-- Category: Badges -->
+							<div class="vplens-customizer-section">
+								<h4 class="vplens-customizer-section-title">
+									<?php esc_html_e( 'Sale & Featured Badges', 'search-analytics-insights' ); ?>
+									<span class="dashicons dashicons-arrow-down"></span>
+								</h4>
+								<div class="vplens-customizer-section-content">
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Sale Badge Background', 'search-analytics-insights' ); ?></label>
+										<input type="text" class="vplens-color-picker" name="vplens_settings[design][badges][sale_bg]" value="<?php echo esc_attr( $design['badges']['sale_bg'] ); ?>" data-default-color="#e64980" />
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Sale Badge Text Color', 'search-analytics-insights' ); ?></label>
+										<input type="text" class="vplens-color-picker" name="vplens_settings[design][badges][sale_text]" value="<?php echo esc_attr( $design['badges']['sale_text'] ); ?>" data-default-color="#ffffff" />
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Featured Badge Background', 'search-analytics-insights' ); ?></label>
+										<input type="text" class="vplens-color-picker" name="vplens_settings[design][badges][featured_bg]" value="<?php echo esc_attr( $design['badges']['featured_bg'] ); ?>" data-default-color="#0b7285" />
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Featured Badge Text Color', 'search-analytics-insights' ); ?></label>
+										<input type="text" class="vplens-color-picker" name="vplens_settings[design][badges][featured_text]" value="<?php echo esc_attr( $design['badges']['featured_text'] ); ?>" data-default-color="#ffffff" />
+									</div>
+								</div>
+							</div>
+
+							<!-- Category: No Results -->
+							<div class="vplens-customizer-section">
+								<h4 class="vplens-customizer-section-title">
+									<?php esc_html_e( 'No Results Message', 'search-analytics-insights' ); ?>
+									<span class="dashicons dashicons-arrow-down"></span>
+								</h4>
+								<div class="vplens-customizer-section-content">
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Message Text', 'search-analytics-insights' ); ?></label>
+										<input type="text" name="vplens_settings[design][no_results][message]" value="<?php echo esc_attr( $design['no_results']['message'] ); ?>" />
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Text Color', 'search-analytics-insights' ); ?></label>
+										<input type="text" class="vplens-color-picker" name="vplens_settings[design][no_results][text_color]" value="<?php echo esc_attr( $design['no_results']['text_color'] ); ?>" data-default-color="#5f6b7a" />
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Font Size (px)', 'search-analytics-insights' ); ?></label>
+										<input type="number" name="vplens_settings[design][no_results][font_size]" value="<?php echo esc_attr( (string) $design['no_results']['font_size'] ); ?>" min="8" max="72" class="small-text" />
+									</div>
+								</div>
+							</div>
+
+							<!-- Category: View All Results -->
+							<div class="vplens-customizer-section">
+								<h4 class="vplens-customizer-section-title">
+									<?php esc_html_e( 'View All Results Button', 'search-analytics-insights' ); ?>
+									<span class="dashicons dashicons-arrow-down"></span>
+								</h4>
+								<div class="vplens-customizer-section-content">
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'View All Text', 'search-analytics-insights' ); ?></label>
+										<input type="text" name="vplens_settings[design][view_all][text]" value="<?php echo esc_attr( $design['view_all']['text'] ); ?>" />
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Text Color', 'search-analytics-insights' ); ?></label>
+										<input type="text" class="vplens-color-picker" name="vplens_settings[design][view_all][text_color]" value="<?php echo esc_attr( $design['view_all']['text_color'] ); ?>" data-default-color="#0b7285" />
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Background Color', 'search-analytics-insights' ); ?></label>
+										<input type="text" class="vplens-color-picker" name="vplens_settings[design][view_all][bg_color]" value="<?php echo esc_attr( $design['view_all']['bg_color'] ); ?>" data-default-color="#f8fafc" />
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Hover Color', 'search-analytics-insights' ); ?></label>
+										<input type="text" class="vplens-color-picker" name="vplens_settings[design][view_all][hover_color]" value="<?php echo esc_attr( $design['view_all']['hover_color'] ); ?>" data-default-color="#0f9bb0" />
+									</div>
+									<div class="vplens-control-group">
+										<label><?php esc_html_e( 'Alignment', 'search-analytics-insights' ); ?></label>
+										<select name="vplens_settings[design][view_all][align]">
+											<option value="center" <?php selected( 'center', $design['view_all']['align'] ); ?>><?php esc_html_e( 'Center', 'search-analytics-insights' ); ?></option>
+											<option value="left" <?php selected( 'left', $design['view_all']['align'] ); ?>><?php esc_html_e( 'Left', 'search-analytics-insights' ); ?></option>
+											<option value="right" <?php selected( 'right', $design['view_all']['align'] ); ?>><?php esc_html_e( 'Right', 'search-analytics-insights' ); ?></option>
+										</select>
+									</div>
+								</div>
+							</div>
+
+							<!-- Customizer Actions -->
+							<div class="vplens-customizer-actions">
+								<?php submit_button( __( 'Save Design', 'search-analytics-insights' ), 'primary', 'submit', false ); ?>
+								<button type="button" id="vplens-reset-design-btn" class="button button-secondary"><?php esc_html_e( 'Reset to Defaults', 'search-analytics-insights' ); ?></button>
+							</div>
+						</div>
+					</form>
+
+					<!-- Right Column: Live Preview Area -->
+					<div class="vplens-preview-panel">
+						<div class="vplens-preview-header">
+							<h3><?php esc_html_e( 'Live Preview', 'search-analytics-insights' ); ?></h3>
+							
+							<div class="vplens-preview-controls">
+								<!-- Preview State Switchers -->
+								<div class="vplens-preview-state-tabs">
+									<button type="button" class="vplens-state-tab active" data-state="form"><?php esc_html_e( 'Form', 'search-analytics-insights' ); ?></button>
+									<button type="button" class="vplens-state-tab" data-state="results"><?php esc_html_e( 'Results', 'search-analytics-insights' ); ?></button>
+									<button type="button" class="vplens-state-tab" data-state="no_results"><?php esc_html_e( 'No Results', 'search-analytics-insights' ); ?></button>
+									<button type="button" class="vplens-state-tab" data-state="loading"><?php esc_html_e( 'Loading', 'search-analytics-insights' ); ?></button>
+								</div>
+
+								<!-- Responsive Switcher -->
+								<div class="vplens-preview-device-toggle">
+									<button type="button" class="vplens-device-btn active" data-device="desktop" title="<?php esc_attr_e( 'Desktop Preview', 'search-analytics-insights' ); ?>">
+										<span class="dashicons dashicons-desktop"></span>
+									</button>
+									<button type="button" class="vplens-device-btn" data-device="mobile" title="<?php esc_attr_e( 'Mobile Preview', 'search-analytics-insights' ); ?>">
+										<span class="dashicons dashicons-smartphone"></span>
+									</button>
+								</div>
+							</div>
+						</div>
+
+						<!-- Mockup Window Sandbox Container -->
+						<div class="vplens-preview-sandbox-wrap device-desktop">
+							<div class="vplens-preview-sandbox">
+								<div class="vplens-preview-element-wrapper" id="vplens-preview-root">
+									
+									<!-- The Autocomplete Search Component Mock -->
+									<div class="vplens-ajax-search">
+										<div class="vplens-ajax-search-form">
+											<div class="vplens-ajax-search-wrapper vplens-layout-preview">
+												
+												<!-- Input Wrap -->
+												<div class="vplens-ajax-search-fields">
+													<!-- Optional Left/Right icon -->
+													<span class="vplens-input-icon vplens-preview-search-icon" style="display: flex; align-items: center; justify-content: center; position: absolute; top: 50%; transform: translateY(-50%); pointer-events: none; z-index: 2;">
+														<span class="dashicons dashicons-search" aria-hidden="true"></span>
+													</span>
+													<input type="text" class="vplens-ajax-search-input" placeholder="<?php esc_attr_e( 'Search products...', 'search-analytics-insights' ); ?>" value="Nike" style="width: 100%; box-sizing: border-box; outline: none; transition: all 0.15s ease;" />
+												</div>
+
+												<!-- Button -->
+												<?php
+												$show_btn_icon = ! empty( $design['button']['show_icon'] );
+												$layout_type   = $design['layout']['type'] ?? 'inline';
+												$btn_classes   = 'vplens-ajax-search-button';
+												if ( $show_btn_icon ) {
+													$btn_classes .= ' vplens-btn-has-icon';
+												}
+												if ( 'compact' === $layout_type ) {
+													$btn_classes .= ' vplens-btn-icon-only';
+												}
+												?>
+												<button type="button" class="<?php echo esc_attr( $btn_classes ); ?>" style="display: flex; align-items: center; justify-content: center; font-weight: 600; cursor: pointer; transition: all 0.15s ease; border: none; box-sizing: border-box;">
+													<span class="vplens-btn-icon">
+														<span class="dashicons dashicons-search" aria-hidden="true"></span>
+													</span>
+													<span class="vplens-btn-text"><?php esc_html_e( 'Search', 'search-analytics-insights' ); ?></span>
+												</button>
+
+											</div>
+
+											<!-- Live AJAX Dropdown Mock -->
+											<div class="vplens-ajax-search-results-wrap">
+												
+												<!-- Loading state -->
+												<div class="vplens-ajax-search-status is-loading" style="display: none;">
+													<?php esc_html_e( 'Searching...', 'search-analytics-insights' ); ?>
+												</div>
+
+												<!-- Results Suggestions list -->
+												<ul class="vplens-ajax-search-results" style="list-style: none; margin: 0; padding: 0;">
+													
+													<!-- Suggestion 1: Nike Air Max -->
+													<li class="vplens-ajax-search-result vplens-ajax-search-result--product">
+														<a href="#" class="vplens-ajax-search-link has-featured-image">
+															<span class="vplens-ajax-search-image-wrap">
+																<img class="vplens-ajax-search-image" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='3' width='18' height='18' rx='2' ry='2'></rect><circle cx='8.5' cy='8.5' r='1.5'></circle><polyline points='21 15 16 10 5 21'></polyline></svg>" alt="" />
+															</span>
+															<span class="vplens-ajax-search-details">
+																<span class="vplens-ajax-search-title">Nike Air Max</span>
+																<span class="vplens-product-badges">
+																	<span class="vplens-badge vplens-badge--sale"><?php esc_html_e( 'Sale', 'search-analytics-insights' ); ?></span>
+																</span>
+																<span class="vplens-product-meta-row">
+																	<span class="vplens-product-sku">SKU: NIKE-001</span>
+																</span>
+																<span class="vplens-product-price-stock-row">
+																	<span class="vplens-product-price">$129.00</span>
+																	<span class="vplens-stock vplens-stock--instock"><?php esc_html_e( 'In Stock', 'search-analytics-insights' ); ?></span>
+																</span>
+															</span>
+														</a>
+													</li>
+
+													<!-- Suggestion 2: Adidas Running Shoes -->
+													<li class="vplens-ajax-search-result vplens-ajax-search-result--product">
+														<a href="#" class="vplens-ajax-search-link has-featured-image">
+															<span class="vplens-ajax-search-image-wrap">
+																<img class="vplens-ajax-search-image" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='3' width='18' height='18' rx='2' ry='2'></rect><circle cx='8.5' cy='8.5' r='1.5'></circle><polyline points='21 15 16 10 5 21'></polyline></svg>" alt="" />
+															</span>
+															<span class="vplens-ajax-search-details">
+																<span class="vplens-ajax-search-title">Adidas Running Shoes</span>
+																<span class="vplens-product-meta-row">
+																	<span class="vplens-product-sku">SKU: ADIDAS-002</span>
+																	<span class="vplens-product-cat"><?php esc_html_e( 'Shoes', 'search-analytics-insights' ); ?></span>
+																</span>
+																<span class="vplens-product-price-stock-row">
+																	<span class="vplens-product-price">$99.00</span>
+																</span>
+															</span>
+														</a>
+													</li>
+
+													<!-- Suggestion 3: Premium Running Shoe -->
+													<li class="vplens-ajax-search-result vplens-ajax-search-result--product">
+														<a href="#" class="vplens-ajax-search-link has-featured-image">
+															<span class="vplens-ajax-search-image-wrap">
+																<img class="vplens-ajax-search-image" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='3' width='18' height='18' rx='2' ry='2'></rect><circle cx='8.5' cy='8.5' r='1.5'></circle><polyline points='21 15 16 10 5 21'></polyline></svg>" alt="" />
+															</span>
+															<span class="vplens-ajax-search-details">
+																<span class="vplens-ajax-search-title">Premium Running Shoe</span>
+																<span class="vplens-product-badges">
+																	<span class="vplens-badge vplens-badge--featured"><?php esc_html_e( 'Featured', 'search-analytics-insights' ); ?></span>
+																</span>
+																<span class="vplens-product-meta-row">
+																	<span class="vplens-product-sku">SKU: RUN-003</span>
+																</span>
+																<span class="vplens-product-price-stock-row">
+																	<span class="vplens-product-price">$149.00</span>
+																</span>
+															</span>
+														</a>
+													</li>
+
+													<!-- Footer link -->
+													<li class="vplens-ajax-search-result vplens-ajax-search-result--view-all vplens-ajax-search-all-results">
+														<a href="#" class="vplens-ajax-search-link vplens-ajax-search-link--view-all vplens-ajax-search-all-link">See all results</a>
+													</li>
+
+												</ul>
+
+											</div>
+
+										</div>
+									</div>
+
+								</div>
+							</div>
+						</div>
+
+					</div>
+				</div>
+				<?php
+			}
+		);
 	}
 }

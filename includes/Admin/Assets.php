@@ -53,6 +53,45 @@ final class Assets {
 			true
 		);
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$page = isset( $_GET['page'] ) ? sanitize_key( $_GET['page'] ) : '';
+		if ( 'vplens-design' === $page ) {
+			wp_enqueue_style( 'wp-color-picker' );
+			wp_enqueue_script( 'wp-color-picker' );
+
+			wp_enqueue_style(
+				'vplens-ajax-search',
+				VPLENS_URL . 'assets/css/ajax-search.css',
+				array(),
+				Constants::VERSION
+			);
+
+			wp_enqueue_style(
+				'vplens-admin-design',
+				VPLENS_URL . 'assets/css/admin-design.css',
+				array( 'vplens-admin' ),
+				Constants::VERSION
+			);
+
+			wp_enqueue_script(
+				'vplens-admin-design',
+				VPLENS_URL . 'assets/js/admin-design.js',
+				array( 'jquery', 'wp-color-picker' ),
+				Constants::VERSION,
+				true
+			);
+
+			wp_localize_script(
+				'vplens-admin-design',
+				'vplensDesignI18n',
+				array(
+					'reset_confirm' => __( 'Are you sure you want to reset all design settings back to defaults?', 'search-analytics-insights' ),
+					'searching'     => __( 'Searching...', 'search-analytics-insights' ),
+					'no_results'    => __( 'No results found.', 'search-analytics-insights' ),
+				)
+			);
+		}
+
 		wp_localize_script(
 			'vplens-admin',
 			'vplensAdminI18n',

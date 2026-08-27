@@ -41,7 +41,6 @@ final class SearchForm {
 				'placeholder' => $this->settings->get_placeholder(),
 				'button_text' => $this->settings->get_button_text(),
 				'show_button' => null,
-				'form_style'  => '',
 			),
 			$attributes,
 			'searchlens_form'
@@ -54,15 +53,20 @@ final class SearchForm {
 		if ( $is_ajax_enabled ) {
 			$show_button = false;
 		}
-		$form_style   = sanitize_key( (string) ( '' !== (string) $attributes['form_style'] ? $attributes['form_style'] : $this->settings->get_form_style() ) );
-		$form_style   = in_array( $form_style, array( 'rounded', 'rectangle', 'underlined' ), true ) ? $form_style : $this->settings->get_form_style();
 		$field_id     = wp_unique_id( 'vplens-search-field-' );
 		$action_url   = home_url( '/' );
 		$current_term = isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['s'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
+		wp_enqueue_style(
+			'vplens-search-widget',
+			VPLENS_URL . 'assets/css/search-widget.css',
+			array(),
+			Constants::VERSION
+		);
+
 		ob_start();
 		?>
-		<form role="search" method="get" class="search-form vplens-form vplens-form--<?php echo esc_attr( $form_style ); ?>" action="<?php echo esc_url( $action_url ); ?>">
+		<form role="search" method="get" class="search-form vplens-form" action="<?php echo esc_url( $action_url ); ?>">
 			<label for="<?php echo esc_attr( $field_id ); ?>" class="screen-reader-text">
 				<?php esc_html_e( 'Search for:', 'search-analytics-insights' ); ?>
 			</label>

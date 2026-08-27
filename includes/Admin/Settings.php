@@ -22,10 +22,10 @@ final class Settings {
 	private const SECTION_SEARCH_RESULTS          = 'vplens_search_results';
 	private const SECTION_SEARCH_SOURCES          = 'vplens_search_sources';
 	private const SECTION_ANALYTICS               = 'vplens_analytics';
+	private const SECTION_WOOCOMMERCE             = 'vplens_woocommerce';
 	private const DEFAULT_PLACEHOLDER             = 'Search posts and pages...';
 	private const DEFAULT_BUTTON_TEXT             = 'Search';
 	private const DEFAULT_NO_RESULTS_MESSAGE      = 'No results found.';
-	private const DEFAULT_FORM_STYLE              = 'rounded';
 	private const DEFAULT_MAX_RESULTS             = 10;
 	private const DEFAULT_MINIMUM_CHARACTERS      = 2;
 	private const DEFAULT_DEBOUNCE_TIME           = 300;
@@ -103,14 +103,6 @@ final class Settings {
 			self::SECTION_SEARCH_FORM
 		);
 
-		add_settings_field(
-			'form_style',
-			__( 'Form style', 'search-analytics-insights' ),
-			array( $this, 'render_form_style_field' ),
-			self::PAGE_SLUG,
-			self::SECTION_SEARCH_FORM
-		);
-
 		add_settings_section(
 			self::SECTION_AJAX_SEARCH,
 			__( 'AJAX Search', 'search-analytics-insights' ),
@@ -173,14 +165,6 @@ final class Settings {
 			self::SECTION_SEARCH_RESULTS
 		);
 
-		add_settings_field(
-			'no_results_message',
-			__( 'No results message', 'search-analytics-insights' ),
-			array( $this, 'render_no_results_message_field' ),
-			self::PAGE_SLUG,
-			self::SECTION_SEARCH_RESULTS
-		);
-
 		add_settings_section(
 			self::SECTION_SEARCH_SOURCES,
 			__( 'Search Sources', 'search-analytics-insights' ),
@@ -233,6 +217,37 @@ final class Settings {
 			array( $this, 'render_search_retention_period_field' ),
 			self::PAGE_SLUG,
 			self::SECTION_ANALYTICS
+		);
+
+		add_settings_section(
+			self::SECTION_WOOCOMMERCE,
+			__( 'WooCommerce Search Settings', 'search-analytics-insights' ),
+			array( $this, 'render_woocommerce_section_description' ),
+			self::PAGE_SLUG
+		);
+
+		add_settings_field(
+			'wc_enabled',
+			__( 'Enable WooCommerce Search', 'search-analytics-insights' ),
+			array( $this, 'render_wc_enabled_field' ),
+			self::PAGE_SLUG,
+			self::SECTION_WOOCOMMERCE
+		);
+
+		add_settings_field(
+			'wc_search_fields',
+			__( 'Search Fields', 'search-analytics-insights' ),
+			array( $this, 'render_wc_search_fields_field' ),
+			self::PAGE_SLUG,
+			self::SECTION_WOOCOMMERCE
+		);
+
+		add_settings_field(
+			'wc_display_options',
+			__( 'Display Options', 'search-analytics-insights' ),
+			array( $this, 'render_wc_display_options_field' ),
+			self::PAGE_SLUG,
+			self::SECTION_WOOCOMMERCE
 		);
 	}
 
@@ -326,25 +341,7 @@ final class Settings {
 		);
 	}
 
-	/**
-	 * Render the form style selector.
-	 *
-	 * @return void
-	 */
-	public function render_form_style_field(): void {
-		$settings = $this->get_search_form_settings();
-		$this->render_select_field(
-			$this->field_id( 'search_form', 'form_style' ),
-			$this->field_name( 'search_form', 'form_style' ),
-			(string) $settings['form_style'],
-			array(
-				'rounded'    => __( 'Rounded', 'search-analytics-insights' ),
-				'rectangle'  => __( 'Rectangle', 'search-analytics-insights' ),
-				'underlined' => __( 'Underlined', 'search-analytics-insights' ),
-			),
-			__( 'Choose the default visual treatment for the search form.', 'search-analytics-insights' )
-		);
-	}
+
 
 	/**
 	 * Render the AJAX enabled toggle.
@@ -442,20 +439,7 @@ final class Settings {
 		);
 	}
 
-	/**
-	 * Render the no results message field.
-	 *
-	 * @return void
-	 */
-	public function render_no_results_message_field(): void {
-		$settings = $this->get_search_results_settings();
-		$this->render_textarea_field(
-			$this->field_id( 'search_results', 'no_results_message' ),
-			$this->field_name( 'search_results', 'no_results_message' ),
-			(string) $settings['no_results_message'],
-			__( 'Message shown when a search returns no matches.', 'search-analytics-insights' )
-		);
-	}
+
 
 	/**
 	 * Render the automatic source loading toggle.
@@ -570,7 +554,7 @@ final class Settings {
 	/**
 	 * Get the search form settings.
 	 *
-	 * @return array{placeholder: string, button_text: string, show_button: bool, form_style: string}
+	 * @return array{placeholder: string, button_text: string, show_button: bool}
 	 */
 	public function get_search_form_settings(): array {
 		$settings = $this->get_settings();
@@ -600,16 +584,7 @@ final class Settings {
 		return (string) $settings['button_text'];
 	}
 
-	/**
-	 * Get the saved form style.
-	 *
-	 * @return string
-	 */
-	public function get_form_style(): string {
-		$settings = $this->get_search_form_settings();
 
-		return (string) $settings['form_style'];
-	}
 
 	/**
 	 * Get the saved show button.
@@ -710,7 +685,7 @@ final class Settings {
 	/**
 	 * Get the search results settings.
 	 *
-	 * @return array{show_featured_images: bool, show_post_type_label: bool, no_results_message: string}
+	 * @return array{show_featured_images: bool, show_post_type_label: bool}
 	 */
 	public function get_search_results_settings(): array {
 		$settings = $this->get_settings();
@@ -746,9 +721,9 @@ final class Settings {
 	 * @return string
 	 */
 	public function get_no_results_message(): string {
-		$settings = $this->get_search_results_settings();
+		$design = $this->get_design_settings();
 
-		return (string) $settings['no_results_message'];
+		return (string) ( $design['no_results']['message'] ?? self::DEFAULT_NO_RESULTS_MESSAGE );
 	}
 
 	/**
@@ -809,6 +784,8 @@ final class Settings {
 			'search_results' => $this->sanitize_search_results_settings( $value['search_results'] ?? array() ),
 			'search_sources' => $this->sanitize_search_sources_settings( $value['search_sources'] ?? array() ),
 			'analytics'      => $this->sanitize_analytics_settings( $value['analytics'] ?? array() ),
+			'woocommerce'    => $this->sanitize_woocommerce_settings( $value['woocommerce'] ?? array() ),
+			'design'         => $this->sanitize_design_settings( $value['design'] ?? array() ),
 		);
 	}
 
@@ -908,7 +885,6 @@ final class Settings {
 				'placeholder' => self::DEFAULT_PLACEHOLDER,
 				'button_text' => self::DEFAULT_BUTTON_TEXT,
 				'show_button' => true,
-				'form_style'  => self::DEFAULT_FORM_STYLE,
 			),
 			'ajax_search'    => array(
 				'enabled'            => true,
@@ -919,7 +895,6 @@ final class Settings {
 			'search_results' => array(
 				'show_featured_images' => true,
 				'show_post_type_label' => true,
-				'no_results_message'   => self::DEFAULT_NO_RESULTS_MESSAGE,
 			),
 			'search_sources' => array(
 				'load_all_public_post_types' => false,
@@ -930,6 +905,20 @@ final class Settings {
 				'track_guests'            => true,
 				'search_retention_period' => self::DEFAULT_SEARCH_RETENTION_PERIOD,
 			),
+			'woocommerce'    => array(
+				'enabled'             => true,
+				'search_fields'       => array( 'title', 'sku', 'short_desc', 'desc', 'category', 'tag' ),
+				'show_price'          => true,
+				'show_stock'          => true,
+				'show_sku'            => true,
+				'show_sale_badge'     => true,
+				'show_featured_badge' => true,
+				'show_view_all'       => true,
+				'view_all_label'      => 'See all results',
+				'show_loader'         => true,
+				'focus_overlay'       => true,
+			),
+			'design'         => $this->get_default_design_settings(),
 		);
 	}
 
@@ -938,21 +927,15 @@ final class Settings {
 	 *
 	 * @param mixed $value Raw section value.
 	 *
-	 * @return array{placeholder: string, button_text: string, show_button: bool, form_style: string}
+	 * @return array{placeholder: string, button_text: string, show_button: bool}
 	 */
 	private function sanitize_search_form_settings( $value ): array {
-		$value      = is_array( $value ) ? $value : array();
-		$form_style = isset( $value['form_style'] ) ? sanitize_key( (string) $value['form_style'] ) : self::DEFAULT_FORM_STYLE;
-
-		if ( ! in_array( $form_style, array( 'rounded', 'rectangle', 'underlined' ), true ) ) {
-			$form_style = self::DEFAULT_FORM_STYLE;
-		}
+		$value = is_array( $value ) ? $value : array();
 
 		return array(
 			'placeholder' => $this->sanitize_text_setting( $value['placeholder'] ?? self::DEFAULT_PLACEHOLDER ),
 			'button_text' => $this->sanitize_text_setting( $value['button_text'] ?? self::DEFAULT_BUTTON_TEXT ),
 			'show_button' => ! empty( $value['show_button'] ),
-			'form_style'  => $form_style,
 		);
 	}
 
@@ -990,7 +973,7 @@ final class Settings {
 	 *
 	 * @param mixed $value Raw section value.
 	 *
-	 * @return array{show_featured_images: bool, show_post_type_label: bool, no_results_message: string}
+	 * @return array{show_featured_images: bool, show_post_type_label: bool}
 	 */
 	private function sanitize_search_results_settings( $value ): array {
 		$value = is_array( $value ) ? $value : array();
@@ -998,7 +981,6 @@ final class Settings {
 		return array(
 			'show_featured_images' => ! empty( $value['show_featured_images'] ),
 			'show_post_type_label' => ! empty( $value['show_post_type_label'] ),
-			'no_results_message'   => $this->sanitize_textarea_setting( $value['no_results_message'] ?? self::DEFAULT_NO_RESULTS_MESSAGE ),
 		);
 	}
 
@@ -1204,5 +1186,456 @@ final class Settings {
 		$value = sanitize_textarea_field( (string) $value );
 
 		return '' === $value ? self::DEFAULT_NO_RESULTS_MESSAGE : $value;
+	}
+
+	/**
+	 * Get WooCommerce settings.
+	 *
+	 * @return array
+	 */
+	public function get_woocommerce_settings(): array {
+		$settings = $this->get_settings();
+		$defaults = array(
+			'enabled'             => true,
+			'search_fields'       => array( 'title', 'sku', 'short_desc', 'desc', 'category', 'tag' ),
+			'show_price'          => true,
+			'show_stock'          => true,
+			'show_sku'            => true,
+			'show_sale_badge'     => true,
+			'show_featured_badge' => true,
+			'show_view_all'       => true,
+			'show_loader'         => true,
+			'focus_overlay'       => true,
+		);
+
+		return wp_parse_args( $settings['woocommerce'] ?? array(), $defaults );
+	}
+
+	/**
+	 * Check if WooCommerce is active.
+	 *
+	 * @return bool
+	 */
+	public function is_woocommerce_active(): bool {
+		return class_exists( 'WooCommerce' );
+	}
+
+	/**
+	 * Render WooCommerce section description.
+	 *
+	 * @return void
+	 */
+	public function render_woocommerce_section_description(): void {
+		echo '<p>' . esc_html__( 'Configure search behaviors and display options specifically for WooCommerce products.', 'search-analytics-insights' ) . '</p>';
+		if ( ! $this->is_woocommerce_active() ) {
+			echo '<div class="notice notice-warning inline" style="margin: 0 0 15px 0; padding: 8px 12px; border-left-color: #dba617; background: #fcf8e3;"><p style="margin: 0; font-weight: 600;">' . esc_html__( 'Warning: WooCommerce is currently inactive. Product search features will remain disabled on the frontend.', 'search-analytics-insights' ) . '</p></div>';
+		}
+	}
+
+	/**
+	 * Render WooCommerce enabled toggle.
+	 *
+	 * @return void
+	 */
+	public function render_wc_enabled_field(): void {
+		$settings = $this->get_woocommerce_settings();
+		$disabled = ! $this->is_woocommerce_active();
+		?>
+		<label class="vplens-toggle" for="vplens-wc-enabled">
+			<input
+				id="vplens-wc-enabled"
+				type="checkbox"
+				name="<?php echo esc_attr( $this->field_name( 'woocommerce', 'enabled' ) ); ?>"
+				value="1"
+				<?php checked( ! $disabled && ! empty( $settings['enabled'] ) ); ?>
+				<?php disabled( $disabled ); ?>
+			/>
+			<span><?php esc_html_e( 'Enable WooCommerce product search integration.', 'search-analytics-insights' ); ?></span>
+		</label>
+		<?php
+	}
+
+	/**
+	 * Render WooCommerce search fields checkboxes.
+	 *
+	 * @return void
+	 */
+	public function render_wc_search_fields_field(): void {
+		$settings = $this->get_woocommerce_settings();
+		$disabled = ! $this->is_woocommerce_active();
+		$fields   = array(
+			'title'      => __( 'Product Title', 'search-analytics-insights' ),
+			'sku'        => __( 'Product SKU (and variation SKU)', 'search-analytics-insights' ),
+			'short_desc' => __( 'Short Description', 'search-analytics-insights' ),
+			'desc'       => __( 'Full Description', 'search-analytics-insights' ),
+			'category'   => __( 'Product Category', 'search-analytics-insights' ),
+			'tag'        => __( 'Product Tag', 'search-analytics-insights' ),
+			'attributes' => __( 'Product Attributes (Global)', 'search-analytics-insights' ),
+		);
+		$selected = $settings['search_fields'] ?? array();
+
+		echo '<fieldset class="vplens-post-types-fieldset">';
+		foreach ( $fields as $key => $label ) {
+			$checked = in_array( $key, $selected, true );
+			?>
+			<label class="vplens-post-type-option" for="vplens-wc-field-<?php echo esc_attr( $key ); ?>">
+				<input
+					id="vplens-wc-field-<?php echo esc_attr( $key ); ?>"
+					type="checkbox"
+					name="<?php echo esc_attr( $this->field_name( 'woocommerce', 'search_fields' ) ); ?>[]"
+					value="<?php echo esc_attr( $key ); ?>"
+					<?php checked( ! $disabled && $checked ); ?>
+					<?php disabled( $disabled ); ?>
+				/>
+				<span><?php echo esc_html( $label ); ?></span>
+			</label>
+			<?php
+		}
+		echo '</fieldset>';
+	}
+
+	/**
+	 * Render WooCommerce display options checkboxes.
+	 *
+	 * @return void
+	 */
+	public function render_wc_display_options_field(): void {
+		$settings = $this->get_woocommerce_settings();
+		$disabled = ! $this->is_woocommerce_active();
+
+		$options = array(
+			'show_price'          => __( 'Show product price', 'search-analytics-insights' ),
+			'show_stock'          => __( 'Show stock status (In stock / Out of stock)', 'search-analytics-insights' ),
+			'show_sku'            => __( 'Show product SKU', 'search-analytics-insights' ),
+			'show_sale_badge'     => __( 'Show "Sale" badge', 'search-analytics-insights' ),
+			'show_featured_badge' => __( 'Show "Featured" badge', 'search-analytics-insights' ),
+			'show_loader'         => __( 'Show visual loading indicator during AJAX search requests', 'search-analytics-insights' ),
+			'focus_overlay'       => __( 'Show focus overlay (dim page when suggestion dropdown is open)', 'search-analytics-insights' ),
+		);
+
+		echo '<fieldset class="vplens-post-types-fieldset">';
+		foreach ( $options as $key => $label ) {
+			$checked = ! empty( $settings[ $key ] );
+			?>
+			<label class="vplens-post-type-option" style="display: block; margin-bottom: 8px;" for="vplens-wc-option-<?php echo esc_attr( $key ); ?>">
+				<input
+					id="vplens-wc-option-<?php echo esc_attr( $key ); ?>"
+					type="checkbox"
+					name="<?php echo esc_attr( $this->field_name( 'woocommerce', $key ) ); ?>"
+					value="1"
+					<?php checked( ! $disabled && $checked ); ?>
+					<?php disabled( $disabled ); ?>
+				/>
+				<span><?php echo esc_html( $label ); ?></span>
+			</label>
+			<?php
+		}
+		echo '</fieldset>';
+
+		// Render View All option text box
+		$show_view_all = ! empty( $settings['show_view_all'] );
+		?>
+		<div style="margin-top: 15px;">
+			<label class="vplens-post-type-option" for="vplens-wc-option-show_view_all">
+				<input
+					id="vplens-wc-option-show_view_all"
+					type="checkbox"
+					name="<?php echo esc_attr( $this->field_name( 'woocommerce', 'show_view_all' ) ); ?>"
+					value="1"
+					<?php checked( ! $disabled && $show_view_all ); ?>
+					<?php disabled( $disabled ); ?>
+				/>
+				<span><?php esc_html_e( 'Show "See All Results" link at the bottom of suggestion box.', 'search-analytics-insights' ); ?></span>
+			</label>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Sanitize the WooCommerce settings.
+	 *
+	 * @param mixed $value Raw section value.
+	 *
+	 * @return array
+	 */
+	private function sanitize_woocommerce_settings( $value ): array {
+		$value = is_array( $value ) ? $value : array();
+
+		$allowed_fields = array( 'title', 'sku', 'short_desc', 'desc', 'category', 'tag', 'attributes' );
+		$search_fields  = array();
+		if ( isset( $value['search_fields'] ) && is_array( $value['search_fields'] ) ) {
+			foreach ( $value['search_fields'] as $field ) {
+				$field = sanitize_key( $field );
+				if ( in_array( $field, $allowed_fields, true ) ) {
+					$search_fields[] = $field;
+				}
+			}
+		}
+		if ( empty( $search_fields ) ) {
+			$search_fields = array( 'title', 'sku' );
+		}
+
+		return array(
+			'show_loader'   => ! empty( $value['show_loader'] ),
+			'focus_overlay' => ! empty( $value['focus_overlay'] ),
+		);
+	}
+
+	/**
+	 * Get consolidated design settings.
+	 *
+	 * @return array
+	 */
+	public function get_design_settings(): array {
+		$settings = $this->get_settings();
+		return $settings['design'] ?? $this->get_default_design_settings();
+	}
+
+	/**
+	 * Get the default design customizer settings.
+	 *
+	 * @return array
+	 */
+	public function get_default_design_settings(): array {
+		return array(
+			'input'      => array(
+				'bg_color'          => '#ffffff',
+				'text_color'        => '#102033',
+				'placeholder_color' => '#5f6b7a',
+				'border_color'      => '#c8d3df',
+				'border_width'      => 1,
+				'border_radius'     => 20,
+				'height'            => 52,
+				'font_size'         => 16,
+				'padding'           => 16,
+			),
+			'button'     => array(
+				'bg_color'       => '#0b7285',
+				'hover_bg_color' => '#0f9bb0',
+				'text_color'     => '#ffffff',
+				'width'          => 'auto',
+				'height'         => 52,
+				'border_radius'  => 12,
+				'font_size'      => 16,
+				'text'           => 'Search',
+				'show_icon'      => true,
+			),
+			'layout'     => array(
+				'type'  => 'inline', // inline, full_width, or compact
+				'width' => 600, // standard width in px
+				'gap'   => 12,
+				'align' => 'center',
+			),
+			'icon'       => array(
+				'show'     => true,
+				'size'     => 18,
+				'position' => 'right',
+				'color'    => '#5f6b7a',
+			),
+			'dropdown'   => array(
+				'bg_color'       => '#ffffff',
+				'border_color'   => '#d9e1ea',
+				'border_radius'  => 16,
+				'shadow'         => 'medium',
+				'max_height'     => 400,
+				'result_spacing' => 8,
+				'result_padding' => 12,
+			),
+			'product'    => array(
+				'image_size'      => 48,
+				'title_color'     => '#102033',
+				'title_font_size' => 15,
+				'price_color'     => '#102033',
+				'sku_color'       => '#5f6b7a',
+				'category_color'  => '#868e96',
+				'stock_color'     => '#12b886',
+			),
+			'hover'      => array(
+				'bg_color'   => '#f8fafc',
+				'text_color' => '#0b7285',
+			),
+			'badges'     => array(
+				'sale_bg'       => '#e64980',
+				'sale_text'     => '#ffffff',
+				'featured_bg'   => '#0b7285',
+				'featured_text' => '#ffffff',
+			),
+			'no_results' => array(
+				'message'    => 'No results found.',
+				'text_color' => '#5f6b7a',
+				'font_size'  => 15,
+			),
+			'view_all'   => array(
+				'text'        => 'See all results',
+				'text_color'  => '#0b7285',
+				'bg_color'    => '#f8fafc',
+				'hover_color' => '#0f9bb0',
+				'align'       => 'center',
+			),
+		);
+	}
+
+	/**
+	 * Sanitize the design customizer settings.
+	 *
+	 * @param mixed $value Raw section value.
+	 *
+	 * @return array
+	 */
+	private function sanitize_design_settings( $value ): array {
+		$value = is_array( $value ) ? $value : array();
+
+		$defaults = $this->get_default_design_settings();
+
+		$sanitized = array();
+
+		// Helper to sanitize color (hex value)
+		$sanitize_color = static function ( $color, $fallback ) {
+			$color = trim( (string) $color );
+			if ( preg_match( '/^#([A-Fa-f0-9]{3}){1,2}$/', $color ) ) {
+				return $color;
+			}
+			return $fallback;
+		};
+
+		// 1. Input settings
+		$in_val             = $value['input'] ?? array();
+		$in_def             = $defaults['input'];
+		$sanitized['input'] = array(
+			'bg_color'          => $sanitize_color( $in_val['bg_color'] ?? '', $in_def['bg_color'] ),
+			'text_color'        => $sanitize_color( $in_val['text_color'] ?? '', $in_def['text_color'] ),
+			'placeholder_color' => $sanitize_color( $in_val['placeholder_color'] ?? '', $in_def['placeholder_color'] ),
+			'border_color'      => $sanitize_color( $in_val['border_color'] ?? '', $in_def['border_color'] ),
+			'border_width'      => max( 0, min( 20, absint( $in_val['border_width'] ?? $in_def['border_width'] ) ) ),
+			'border_radius'     => max( 0, min( 100, absint( $in_val['border_radius'] ?? $in_def['border_radius'] ) ) ),
+			'height'            => max( 20, min( 120, absint( $in_val['height'] ?? $in_def['height'] ) ) ),
+			'font_size'         => max( 8, min( 72, absint( $in_val['font_size'] ?? $in_def['font_size'] ) ) ),
+			'padding'           => max( 0, min( 100, absint( $in_val['padding'] ?? $in_def['padding'] ) ) ),
+		);
+
+		// 2. Button settings
+		$btn_val   = $value['button'] ?? array();
+		$btn_def   = $defaults['button'];
+		$width_val = trim( (string) ( $btn_val['width'] ?? $btn_def['width'] ) );
+		if ( 'auto' !== $width_val && '100%' !== $width_val ) {
+			$width_val = absint( $width_val ) . 'px';
+		}
+		$sanitized['button'] = array(
+			'bg_color'       => $sanitize_color( $btn_val['bg_color'] ?? '', $btn_def['bg_color'] ),
+			'hover_bg_color' => $sanitize_color( $btn_val['hover_bg_color'] ?? '', $btn_def['hover_bg_color'] ),
+			'text_color'     => $sanitize_color( $btn_val['text_color'] ?? '', $btn_def['text_color'] ),
+			'width'          => $width_val,
+			'height'         => max( 20, min( 120, absint( $btn_val['height'] ?? $btn_def['height'] ) ) ),
+			'border_radius'  => max( 0, min( 100, absint( $btn_val['border_radius'] ?? $btn_def['border_radius'] ) ) ),
+			'font_size'      => max( 8, min( 72, absint( $btn_val['font_size'] ?? $btn_def['font_size'] ) ) ),
+			'text'           => sanitize_text_field( $btn_val['text'] ?? $btn_def['text'] ),
+			'show_icon'      => ! empty( $btn_val['show_icon'] ),
+		);
+
+		// 3. Layout settings
+		$lay_val  = $value['layout'] ?? array();
+		$lay_def  = $defaults['layout'];
+		$lay_type = sanitize_key( $lay_val['type'] ?? $lay_def['type'] );
+		if ( ! in_array( $lay_type, array( 'inline', 'full_width', 'compact' ), true ) ) {
+			$lay_type = $lay_def['type'];
+		}
+		$lay_align = sanitize_key( $lay_val['align'] ?? $lay_def['align'] );
+		if ( ! in_array( $lay_align, array( 'left', 'center', 'right' ), true ) ) {
+			$lay_align = $lay_def['align'];
+		}
+		$sanitized['layout'] = array(
+			'type'  => $lay_type,
+			'width' => max( 10, min( 2000, absint( $lay_val['width'] ?? $lay_def['width'] ) ) ),
+			'gap'   => max( 0, min( 100, absint( $lay_val['gap'] ?? $lay_def['gap'] ) ) ),
+			'align' => $lay_align,
+		);
+
+		// 4. Icon settings
+		$icon_val = $value['icon'] ?? array();
+		$icon_def = $defaults['icon'];
+		$icon_pos = sanitize_key( $icon_val['position'] ?? $icon_def['position'] );
+		if ( ! in_array( $icon_pos, array( 'left', 'right' ), true ) ) {
+			$icon_pos = $icon_def['position'];
+		}
+		$sanitized['icon'] = array(
+			'show'     => ! empty( $icon_val['show'] ),
+			'size'     => max( 6, min( 120, absint( $icon_val['size'] ?? $icon_def['size'] ) ) ),
+			'position' => $icon_pos,
+			'color'    => $sanitize_color( $icon_val['color'] ?? '', $icon_def['color'] ),
+		);
+
+		// 5. Dropdown settings
+		$drop_val = $value['dropdown'] ?? array();
+		$drop_def = $defaults['dropdown'];
+		$drop_shd = sanitize_key( $drop_val['shadow'] ?? $drop_def['shadow'] );
+		if ( ! in_array( $drop_shd, array( 'none', 'low', 'medium', 'high' ), true ) ) {
+			$drop_shd = $drop_def['shadow'];
+		}
+		$sanitized['dropdown'] = array(
+			'bg_color'       => $sanitize_color( $drop_val['bg_color'] ?? '', $drop_def['bg_color'] ),
+			'border_color'   => $sanitize_color( $drop_val['border_color'] ?? '', $drop_def['border_color'] ),
+			'border_radius'  => max( 0, min( 100, absint( $drop_val['border_radius'] ?? $drop_def['border_radius'] ) ) ),
+			'shadow'         => $drop_shd,
+			'max_height'     => max( 100, min( 2000, absint( $drop_val['max_height'] ?? $drop_def['max_height'] ) ) ),
+			'result_spacing' => max( 0, min( 100, absint( $drop_val['result_spacing'] ?? $drop_def['result_spacing'] ) ) ),
+			'result_padding' => max( 0, min( 100, absint( $drop_val['result_padding'] ?? $drop_def['result_padding'] ) ) ),
+		);
+
+		// 6. Product results settings
+		$prod_val             = $value['product'] ?? array();
+		$prod_def             = $defaults['product'];
+		$sanitized['product'] = array(
+			'image_size'      => max( 16, min( 256, absint( $prod_val['image_size'] ?? $prod_def['image_size'] ) ) ),
+			'title_color'     => $sanitize_color( $prod_val['title_color'] ?? '', $prod_def['title_color'] ),
+			'title_font_size' => max( 8, min( 72, absint( $prod_val['title_font_size'] ?? $prod_def['title_font_size'] ) ) ),
+			'price_color'     => $sanitize_color( $prod_val['price_color'] ?? '', $prod_def['price_color'] ),
+			'sku_color'       => $sanitize_color( $prod_val['sku_color'] ?? '', $prod_def['sku_color'] ),
+			'category_color'  => $sanitize_color( $prod_val['category_color'] ?? '', $prod_def['category_color'] ),
+			'stock_color'     => $sanitize_color( $prod_val['stock_color'] ?? '', $prod_def['stock_color'] ),
+		);
+
+		// 7. Hover settings
+		$hov_val            = $value['hover'] ?? array();
+		$hov_def            = $defaults['hover'];
+		$sanitized['hover'] = array(
+			'bg_color'   => $sanitize_color( $hov_val['bg_color'] ?? '', $hov_def['bg_color'] ),
+			'text_color' => $sanitize_color( $hov_val['text_color'] ?? '', $hov_def['text_color'] ),
+		);
+
+		// 8. Badges settings
+		$bdg_val             = $value['badges'] ?? array();
+		$bdg_def             = $defaults['badges'];
+		$sanitized['badges'] = array(
+			'sale_bg'       => $sanitize_color( $bdg_val['sale_bg'] ?? '', $bdg_def['sale_bg'] ),
+			'sale_text'     => $sanitize_color( $bdg_val['sale_text'] ?? '', $bdg_def['sale_text'] ),
+			'featured_bg'   => $sanitize_color( $bdg_val['featured_bg'] ?? '', $bdg_def['featured_bg'] ),
+			'featured_text' => $sanitize_color( $bdg_val['featured_text'] ?? '', $bdg_def['featured_text'] ),
+		);
+
+		// 9. No Results settings
+		$no_val                  = $value['no_results'] ?? array();
+		$no_def                  = $defaults['no_results'];
+		$sanitized['no_results'] = array(
+			'message'    => sanitize_text_field( $no_val['message'] ?? $no_def['message'] ),
+			'text_color' => $sanitize_color( $no_val['text_color'] ?? '', $no_def['text_color'] ),
+			'font_size'  => max( 8, min( 72, absint( $no_val['font_size'] ?? $no_def['font_size'] ) ) ),
+		);
+
+		// 10. View All settings
+		$va_val   = $value['view_all'] ?? array();
+		$va_def   = $defaults['view_all'];
+		$va_align = sanitize_key( $va_val['align'] ?? $va_def['align'] );
+		if ( ! in_array( $va_align, array( 'left', 'center', 'right' ), true ) ) {
+			$va_align = $va_def['align'];
+		}
+		$sanitized['view_all'] = array(
+			'text'        => sanitize_text_field( $va_val['text'] ?? $va_def['text'] ),
+			'text_color'  => $sanitize_color( $va_val['text_color'] ?? '', $va_def['text_color'] ),
+			'bg_color'    => $sanitize_color( $va_val['bg_color'] ?? '', $va_def['bg_color'] ),
+			'hover_color' => $sanitize_color( $va_val['hover_color'] ?? '', $va_def['hover_color'] ),
+			'align'       => $va_align,
+		);
+
+		return $sanitized;
 	}
 }

@@ -142,4 +142,28 @@ final class AnalyticsService {
 	public function clear_all_data(): bool {
 		return $this->repository->clear_all();
 	}
+
+	/**
+	 * Get most clicked products.
+	 *
+	 * @param array<string, mixed> $filters Query filters.
+	 * @param int                  $limit   Limit.
+	 *
+	 * @return array
+	 */
+	public function get_most_clicked_products( array $filters = array(), int $limit = 10 ): array {
+		return $this->repository->get_most_clicked_products( $filters, $limit );
+	}
+
+	/**
+	 * Get search performance keyword metrics.
+	 *
+	 * @param array<string, mixed> $filters Query filters.
+	 * @param int                  $limit   Limit.
+	 *
+	 * @return array
+	 */
+	public function get_search_performance( array $filters = array(), int $limit = 10 ): array {
+		return $this->repository->get_search_performance( $filters, $limit );
+	}
 }

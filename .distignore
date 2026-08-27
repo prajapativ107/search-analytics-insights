@@ -1,0 +1,61 @@
+# Exclude version control and CI/CD
+/.git
+/.github
+/.gitignore
+/.gitattributes
+
+# Exclude WordPress.org assets directory
+/.wordpress-org
+
+# Exclude macOS / OS system files
+.DS_Store
+Thumbs.db
+
+# Exclude IDE settings
+/.vscode
+/.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# Exclude development config and dependencies
+/.editorconfig
+/composer.json
+/composer.lock
+/phpcs.xml
+/phpcbf.xml
+/node_modules
+/vendor
+package-lock.json
+npm-debug.log
+yarn-error.log
+
+# Exclude Build, Archives & Logs
+/dist
+/build
+*.zip
+*.tar.gz
+*.log
+pip-log.txt
+
+# Exclude PHPUnit & Testing files
+.phpunit.result.cache
+/tests
+/coverage
+.phpunit.state
+phpunit.xml
+
+# Exclude Environment files
+.env
+.env.*
+
+# Exclude GitHub documents
+/CHANGELOG.md
+/CONTRIBUTING.md
+/README.md
+/SECURITY.md
+
+# Exclude the ignore file itself
+.distignore

@@ -66,6 +66,8 @@ final class Plugin {
 	private function register_hooks(): void {
 		add_action( 'init', array( $this, 'boot_modules' ), 5 );
 		add_action( 'vplens_cleanup', array( $this, 'run_cleanup' ) );
+		add_action( 'wp_head', array( $this, 'output_design_css_variables' ) );
+		add_action( 'admin_head', array( $this, 'output_design_css_variables' ) );
 	}
 
 
@@ -287,5 +289,89 @@ final class Plugin {
 
 		$repository = $this->container->has( SearchRepository::class ) ? $this->container->get( SearchRepository::class ) : new SearchRepository();
 		$repository->delete_older_than( $retention_days );
+	}
+
+	/**
+	 * Output the custom CSS variables for the search form design settings.
+	 *
+	 * @return void
+	 */
+	public function output_design_css_variables(): void {
+		$settings_helper = $this->container->has( Settings::class ) ? $this->container->get( Settings::class ) : new Settings();
+		$design          = $settings_helper->get_design_settings();
+
+		// Convert dropdown shadow setting to box-shadow value
+		$shadow_val = 'none';
+		if ( 'low' === $design['dropdown']['shadow'] ) {
+			$shadow_val = '0 2px 8px rgba(0, 0, 0, 0.08)';
+		} elseif ( 'medium' === $design['dropdown']['shadow'] ) {
+			$shadow_val = '0 8px 30px rgba(0, 0, 0, 0.12)';
+		} elseif ( 'high' === $design['dropdown']['shadow'] ) {
+			$shadow_val = '0 15px 50px rgba(0, 0, 0, 0.18)';
+		}
+
+		// Ensure layout gap defaults to 0 if not set
+		$gap_val = isset( $design['layout']['gap'] ) ? absint( $design['layout']['gap'] ) . 'px' : '12px';
+
+		?>
+		<style id="vplens-design-vars">
+			:root {
+				--vplens-input-bg: <?php echo esc_attr( $design['input']['bg_color'] ); ?>;
+				--vplens-input-text: <?php echo esc_attr( $design['input']['text_color'] ); ?>;
+				--vplens-input-placeholder: <?php echo esc_attr( $design['input']['placeholder_color'] ); ?>;
+				--vplens-input-border-color: <?php echo esc_attr( $design['input']['border_color'] ); ?>;
+				--vplens-input-border-width: <?php echo esc_attr( (string) $design['input']['border_width'] ); ?>px;
+				--vplens-input-border-radius: <?php echo esc_attr( (string) $design['input']['border_radius'] ); ?>px;
+				--vplens-input-height: <?php echo esc_attr( (string) $design['input']['height'] ); ?>px;
+				--vplens-input-font-size: <?php echo esc_attr( (string) $design['input']['font_size'] ); ?>px;
+				--vplens-input-padding: <?php echo esc_attr( (string) $design['input']['padding'] ); ?>px;
+
+				--vplens-button-bg: <?php echo esc_attr( $design['button']['bg_color'] ); ?>;
+				--vplens-button-hover-bg: <?php echo esc_attr( $design['button']['hover_bg_color'] ); ?>;
+				--vplens-button-text: <?php echo esc_attr( $design['button']['text_color'] ); ?>;
+				--vplens-button-width: <?php echo esc_attr( (string) $design['button']['width'] ); ?>;
+				--vplens-button-height: <?php echo esc_attr( (string) $design['button']['height'] ); ?>px;
+				--vplens-button-border-radius: <?php echo esc_attr( (string) $design['button']['border_radius'] ); ?>px;
+				--vplens-button-font-size: <?php echo esc_attr( (string) $design['button']['font_size'] ); ?>px;
+
+				--vplens-icon-color: <?php echo esc_attr( $design['icon']['color'] ); ?>;
+				--vplens-icon-size: <?php echo esc_attr( (string) $design['icon']['size'] ); ?>px;
+
+				--vplens-layout-width: <?php echo esc_attr( (string) $design['layout']['width'] ); ?>px;
+				--vplens-layout-gap: <?php echo esc_attr( $gap_val ); ?>;
+
+				--vplens-dropdown-bg: <?php echo esc_attr( $design['dropdown']['bg_color'] ); ?>;
+				--vplens-dropdown-border-color: <?php echo esc_attr( $design['dropdown']['border_color'] ); ?>;
+				--vplens-dropdown-border-radius: <?php echo esc_attr( (string) $design['dropdown']['border_radius'] ); ?>px;
+				--vplens-dropdown-shadow: <?php echo esc_attr( $shadow_val ); ?>;
+				--vplens-dropdown-max-height: <?php echo esc_attr( (string) $design['dropdown']['max_height'] ); ?>px;
+				--vplens-dropdown-result-spacing: <?php echo esc_attr( (string) $design['dropdown']['result_spacing'] ); ?>px;
+				--vplens-dropdown-result-padding: <?php echo esc_attr( (string) $design['dropdown']['result_padding'] ); ?>px;
+
+				--vplens-product-image-size: <?php echo esc_attr( (string) $design['product']['image_size'] ); ?>px;
+				--vplens-product-title-color: <?php echo esc_attr( $design['product']['title_color'] ); ?>;
+				--vplens-product-title-font-size: <?php echo esc_attr( (string) $design['product']['title_font_size'] ); ?>px;
+				--vplens-product-price-color: <?php echo esc_attr( $design['product']['price_color'] ); ?>;
+				--vplens-product-sku-color: <?php echo esc_attr( $design['product']['sku_color'] ); ?>;
+				--vplens-product-category-color: <?php echo esc_attr( $design['product']['category_color'] ); ?>;
+				--vplens-product-stock-color: <?php echo esc_attr( $design['product']['stock_color'] ); ?>;
+
+				--vplens-hover-bg: <?php echo esc_attr( $design['hover']['bg_color'] ); ?>;
+				--vplens-hover-text: <?php echo esc_attr( $design['hover']['text_color'] ); ?>;
+
+				--vplens-badge-sale-bg: <?php echo esc_attr( $design['badges']['sale_bg'] ); ?>;
+				--vplens-badge-sale-text: <?php echo esc_attr( $design['badges']['sale_text'] ); ?>;
+				--vplens-badge-featured-bg: <?php echo esc_attr( $design['badges']['featured_bg'] ); ?>;
+				--vplens-badge-featured-text: <?php echo esc_attr( $design['badges']['featured_text'] ); ?>;
+
+				--vplens-no-results-color: <?php echo esc_attr( $design['no_results']['text_color'] ); ?>;
+				--vplens-no-results-font-size: <?php echo esc_attr( (string) $design['no_results']['font_size'] ); ?>px;
+
+				--vplens-view-all-text: <?php echo esc_attr( $design['view_all']['text_color'] ); ?>;
+				--vplens-view-all-bg: <?php echo esc_attr( $design['view_all']['bg_color'] ); ?>;
+				--vplens-view-all-hover: <?php echo esc_attr( $design['view_all']['hover_color'] ); ?>;
+			}
+		</style>
+		<?php
 	}
 }

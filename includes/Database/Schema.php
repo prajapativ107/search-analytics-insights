@@ -26,6 +26,7 @@ final class Schema {
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
 		$table_name      = Constants::table_name();
+		$table_clicks    = Constants::table_clicks_name();
 		$charset_collate = $wpdb->get_charset_collate();
 
 		$sql = "CREATE TABLE {$table_name} (
@@ -56,6 +57,23 @@ final class Schema {
 			KEY page_type (page_type)
 		) {$charset_collate};";
 
+		$sql_clicks = "CREATE TABLE {$table_clicks} (
+			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+			search_id bigint(20) unsigned NOT NULL,
+			post_id bigint(20) unsigned NOT NULL,
+			clicked_at datetime NOT NULL,
+			user_id bigint(20) unsigned NULL DEFAULT NULL,
+			session_id char(64) NULL DEFAULT NULL,
+			created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			PRIMARY KEY  (id),
+			KEY search_id (search_id),
+			KEY post_id (post_id),
+			KEY clicked_at (clicked_at),
+			KEY user_id (user_id),
+			KEY session_id (session_id)
+		) {$charset_collate};";
+
 		dbDelta( $sql );
+		dbDelta( $sql_clicks );
 	}
 }
