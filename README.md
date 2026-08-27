@@ -169,6 +169,15 @@ We take security seriously. Please read our [SECURITY.md](SECURITY.md) to unders
 
 ## Changelog
 
+### 1.1.0 (August 27, 2026)
+* **Design Customizer**: Added a live-preview Design Customizer page allowing admin users to dynamically customize search input, search button, layouts (inline, full-width, compact), suggestions dropdown list, WooCommerce product results, hover styles, and sale/featured badges.
+* **Dynamic CSS Variables**: Implemented automatic dynamic CSS variables generation and injection on frontend (`wp_head`) and admin (`admin_head`) hooks.
+* **Layout Improvements**: Introduced a new collapsible sidebar customizer, state toggles for suggestions in the preview panel, and support for desktop and mobile preview boundaries.
+* **Cleanups**: Removed the old static search form styles, focus overlay backdrops, and replaced custom inline SVGs with standard WordPress Dashicons.
+
+### 1.0.0 (July 29, 2026)
+* Initial public release containing native search tracking, real-time AJAX search suggestions, aggregate analytics dashboard, Gutenberg blocks, classic widgets, and CSV export.
+
 See the full history of changes in [CHANGELOG.md](CHANGELOG.md).
 
 ---

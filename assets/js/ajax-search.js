@@ -48,21 +48,6 @@
 		if (resultsWrap) {
 			resultsWrap.style.display = isVisible ? 'block' : 'none';
 		}
-
-		const wcFocusOverlay = '1' === wrapper.getAttribute('data-wc-focus-overlay');
-		if (wcFocusOverlay) {
-			let overlay = document.querySelector('.vplens-search-overlay');
-			if (isVisible) {
-				if (!overlay) {
-					overlay = document.createElement('div');
-					overlay.className = 'vplens-search-overlay';
-					document.body.appendChild(overlay);
-				}
-				overlay.classList.add('is-active');
-			} else if (overlay) {
-				overlay.classList.remove('is-active');
-			}
-		}
 	}
 
 	function hideResultsUI(wrapper) {
@@ -92,6 +77,7 @@
 		const showFeaturedImages = '1' === wrapper.getAttribute('data-show-featured-images');
 		const showPostTypeLabel = '1' === wrapper.getAttribute('data-show-post-type-label');
 		const state = getState(wrapper);
+		const i18n = window.vplensAjaxSearchI18n || {};
 
 		const wcEnabled = '1' === wrapper.getAttribute('data-wc-enabled');
 		const wcShowPrice = '1' === wrapper.getAttribute('data-wc-show-price');
@@ -137,10 +123,10 @@
 					link.setAttribute('data-search-id', searchId);
 
 					imageWrap.className = 'vplens-ajax-search-image-wrap';
-					if (showFeaturedImages && item.featured_image) {
+					if (showFeaturedImages) {
 						const image = document.createElement('img');
 						image.className = 'vplens-ajax-search-image';
-						image.src = item.featured_image;
+						image.src = item.featured_image || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='3' width='18' height='18' rx='2' ry='2'></rect><circle cx='8.5' cy='8.5' r='1.5'></circle><polyline points='21 15 16 10 5 21'></polyline></svg>";
 						image.alt = '';
 						image.loading = 'lazy';
 						image.decoding = 'async';
@@ -160,13 +146,13 @@
 					if (wcShowSale && item.is_on_sale) {
 						const badge = document.createElement('span');
 						badge.className = 'vplens-badge vplens-badge--sale';
-						badge.textContent = 'Sale';
+						badge.textContent = i18n.sale || 'Sale';
 						badgesWrap.appendChild(badge);
 					}
 					if (wcShowFeatured && item.is_featured) {
 						const badge = document.createElement('span');
 						badge.className = 'vplens-badge vplens-badge--featured';
-						badge.textContent = 'Featured';
+						badge.textContent = i18n.featured || 'Featured';
 						badgesWrap.appendChild(badge);
 					}
 					if (badgesWrap.childNodes.length) {
@@ -207,7 +193,7 @@
 					if (wcShowStock && item.stock_status) {
 						const stock = document.createElement('span');
 						stock.className = 'vplens-stock vplens-stock--' + item.stock_status;
-						stock.textContent = item.stock_status === 'instock' ? 'In stock' : 'Out of stock';
+						stock.textContent = item.stock_status === 'instock' ? (i18n.in_stock || 'In stock') : (i18n.out_stock || 'Out of stock');
 						priceStockRow.appendChild(stock);
 					}
 
@@ -240,10 +226,10 @@
 
 					imageWrap.className = 'vplens-ajax-search-image-wrap';
 
-					if (showFeaturedImages && item.featured_image) {
+					if (showFeaturedImages) {
 						const image = document.createElement('img');
 						image.className = 'vplens-ajax-search-image';
-						image.src = item.featured_image;
+						image.src = item.featured_image || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='3' width='18' height='18' rx='2' ry='2'></rect><circle cx='8.5' cy='8.5' r='1.5'></circle><polyline points='21 15 16 10 5 21'></polyline></svg>";
 						image.alt = '';
 						image.loading = 'lazy';
 						image.decoding = 'async';
@@ -555,7 +541,7 @@
 		document.addEventListener(
 			'click',
 			function (event) {
-				if (!wrapper.contains(event.target) || event.target.classList.contains('vplens-search-overlay')) {
+				if (!wrapper.contains(event.target)) {
 					clearResults(wrapper);
 					hideResultsUI(wrapper);
 				}

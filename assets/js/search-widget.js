@@ -182,13 +182,13 @@
 				link.href = item.url || '#';
 				link.tabIndex = -1;
 
-				if (showFeaturedImages && item.featured_image) {
+				if (showFeaturedImages) {
 					const imageWrap = document.createElement('span');
 					const image = document.createElement('img');
 
 					imageWrap.className = 'vplens-search-image-wrap';
 					image.className = 'vplens-search-image';
-					image.src = item.featured_image;
+					image.src = item.featured_image || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='3' width='18' height='18' rx='2' ry='2'></rect><circle cx='8.5' cy='8.5' r='1.5'></circle><polyline points='21 15 16 10 5 21'></polyline></svg>";
 					image.alt = '';
 					image.loading = 'lazy';
 					image.decoding = 'async';

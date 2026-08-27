@@ -67,6 +67,8 @@ final class SearchWidget extends \WP_Widget {
 		$open_mode    = ! empty( $instance['open_mode'] ) ? sanitize_key( (string) $instance['open_mode'] ) : 'dropdown';
 		$show_label   = ! empty( $instance['show_label'] );
 
+		wp_enqueue_style( 'dashicons' );
+
 		wp_enqueue_style(
 			'vplens-search-widget',
 			VPLENS_URL . 'assets/css/search-widget.css',
@@ -120,16 +122,9 @@ final class SearchWidget extends \WP_Widget {
 				<span class="vplens-search-toggle-icon" aria-hidden="true">
 					<?php
 					$allowed_tags = array(
-						'svg'  => array(
+						'span' => array(
 							'class'       => true,
 							'aria-hidden' => true,
-							'focusable'   => true,
-							'viewbox'     => true,
-							'xmlns'       => true,
-						),
-						'path' => array(
-							'd'    => true,
-							'fill' => true,
 						),
 					);
 					echo wp_kses( $this->get_icon_markup(), $allowed_tags );
@@ -151,7 +146,6 @@ final class SearchWidget extends \WP_Widget {
 					$rendered_form = $search_form->render(
 						array(
 							'show_button' => $settings->get_show_button(),
-							'form_style'  => $settings->get_form_style(),
 						)
 					);
 					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
@@ -323,6 +317,6 @@ final class SearchWidget extends \WP_Widget {
 	 * @return string
 	 */
 	public static function get_icon_markup(): string {
-		return '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="vplens-search-icon" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M10.5 4a6.5 6.5 0 1 0 4.02 11.62l4.43 4.43 1.41-1.41-4.43-4.43A6.5 6.5 0 0 0 10.5 4Zm0 2a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Z"/></svg>';
+		return '<span class="dashicons dashicons-search" aria-hidden="true"></span>';
 	}
 }

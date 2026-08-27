@@ -20,7 +20,6 @@ final class Activator {
 			'placeholder' => 'Search posts and pages...',
 			'button_text' => 'Search',
 			'show_button' => true,
-			'form_style'  => 'rounded',
 		),
 		'ajax_search'    => array(
 			'enabled'            => true,
@@ -31,7 +30,6 @@ final class Activator {
 		'search_results' => array(
 			'show_featured_images' => true,
 			'show_post_type_label' => true,
-			'no_results_message'   => 'No results found.',
 		),
 		'search_sources' => array(
 			'load_all_public_post_types' => false,

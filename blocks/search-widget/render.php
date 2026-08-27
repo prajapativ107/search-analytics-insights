@@ -36,6 +36,8 @@ defined( 'ABSPATH' ) || exit;
 	$widget_id   = wp_unique_id( 'vplens-block-search-widget-' );
 	$popup_id    = $widget_id . '-popup';
 
+	wp_enqueue_style( 'dashicons' );
+
 	wp_enqueue_style(
 		'vplens-block-search-widget',
 		VPLENS_URL . 'assets/css/block-search-widget.css',
@@ -69,28 +71,19 @@ defined( 'ABSPATH' ) || exit;
 	);
 
 	$allowed_tags = array(
-		'svg'  => array(
+		'span' => array(
 			'class'       => true,
 			'aria-hidden' => true,
-			'focusable'   => true,
-			'viewbox'     => true,
-			'xmlns'       => true,
-		),
-		'path' => array(
-			'd'    => true,
-			'fill' => true,
 		),
 	);
 
 	$rendered_form = $enable_ajax_search ? $ajax_form->render(
 		array(
 			'show_featured_images' => $show_featured_images,
-			'form_style'           => $settings->get_form_style(),
 		)
 	) : $search_form->render(
 		array(
 			'show_button' => $settings->get_show_button(),
-			'form_style'  => $settings->get_form_style(),
 		)
 	);
 	?>

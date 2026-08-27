@@ -754,25 +754,30 @@ final class SearchRepository {
 
 			// 1. Product Title
 			if ( in_array( 'title', $search_fields, true ) ) {
-				$clauses[] = $wpdb->prepare( "({$wpdb->posts}.post_title LIKE %s)", $like );
+				$clauses[] = $wpdb->prepare( '(%i.post_title LIKE %s)', $wpdb->posts, $like );
 			}
 
 			// 2. Full Description
 			if ( in_array( 'desc', $search_fields, true ) ) {
-				$clauses[] = $wpdb->prepare( "({$wpdb->posts}.post_content LIKE %s)", $like );
+				$clauses[] = $wpdb->prepare( '(%i.post_content LIKE %s)', $wpdb->posts, $like );
 			}
 
 			// 3. Short Description
 			if ( in_array( 'short_desc', $search_fields, true ) ) {
-				$clauses[] = $wpdb->prepare( "({$wpdb->posts}.post_excerpt LIKE %s)", $like );
+				$clauses[] = $wpdb->prepare( '(%i.post_excerpt LIKE %s)', $wpdb->posts, $like );
 			}
 
 			// 4. SKU (Simple and Variable parent lookup)
 			if ( in_array( 'sku', $search_fields, true ) ) {
 				$sku_matched_ids = $this->get_product_ids_by_sku( $term );
 				if ( ! empty( $sku_matched_ids ) ) {
-					$ids_str   = implode( ',', $sku_matched_ids );
-					$clauses[] = "({$wpdb->posts}.ID IN ($ids_str))";
+					$placeholders = implode( ',', array_fill( 0, count( $sku_matched_ids ), '%d' ) );
+					// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+					$clauses[] = $wpdb->prepare(
+						'(%i.ID IN (' . $placeholders . '))',
+						array_merge( array( $wpdb->posts ), $sku_matched_ids )
+					);
+					// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
 				}
 			}
 
@@ -780,8 +785,13 @@ final class SearchRepository {
 			if ( in_array( 'category', $search_fields, true ) ) {
 				$cat_matched_ids = $this->get_product_ids_by_taxonomy( 'product_cat', $term );
 				if ( ! empty( $cat_matched_ids ) ) {
-					$ids_str   = implode( ',', $cat_matched_ids );
-					$clauses[] = "({$wpdb->posts}.ID IN ($ids_str))";
+					$placeholders = implode( ',', array_fill( 0, count( $cat_matched_ids ), '%d' ) );
+					// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+					$clauses[] = $wpdb->prepare(
+						'(%i.ID IN (' . $placeholders . '))',
+						array_merge( array( $wpdb->posts ), $cat_matched_ids )
+					);
+					// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
 				}
 			}
 
@@ -789,8 +799,13 @@ final class SearchRepository {
 			if ( in_array( 'tag', $search_fields, true ) ) {
 				$tag_matched_ids = $this->get_product_ids_by_taxonomy( 'product_tag', $term );
 				if ( ! empty( $tag_matched_ids ) ) {
-					$ids_str   = implode( ',', $tag_matched_ids );
-					$clauses[] = "({$wpdb->posts}.ID IN ($ids_str))";
+					$placeholders = implode( ',', array_fill( 0, count( $tag_matched_ids ), '%d' ) );
+					// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+					$clauses[] = $wpdb->prepare(
+						'(%i.ID IN (' . $placeholders . '))',
+						array_merge( array( $wpdb->posts ), $tag_matched_ids )
+					);
+					// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
 				}
 			}
 
@@ -798,8 +813,13 @@ final class SearchRepository {
 			if ( in_array( 'attributes', $search_fields, true ) ) {
 				$attr_matched_ids = $this->get_product_ids_by_attributes( $term );
 				if ( ! empty( $attr_matched_ids ) ) {
-					$ids_str   = implode( ',', $attr_matched_ids );
-					$clauses[] = "({$wpdb->posts}.ID IN ($ids_str))";
+					$placeholders = implode( ',', array_fill( 0, count( $attr_matched_ids ), '%d' ) );
+					// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+					$clauses[] = $wpdb->prepare(
+						'(%i.ID IN (' . $placeholders . '))',
+						array_merge( array( $wpdb->posts ), $attr_matched_ids )
+					);
+					// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
 				}
 			}
 
@@ -827,10 +847,13 @@ final class SearchRepository {
 
 		// Fetch all post IDs matching SKU meta
 		$query = $wpdb->prepare(
-			"SELECT DISTINCT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_sku' AND meta_value LIKE %s LIMIT 100",
-			'%' . $wpdb->esc_like( $term ) . '%'
+			'SELECT DISTINCT post_id FROM %i WHERE meta_key = %s AND meta_value LIKE %s LIMIT %d',
+			$wpdb->postmeta,
+			'_sku',
+			'%' . $wpdb->esc_like( $term ) . '%',
+			100
 		);
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
 		$post_ids = array_map( 'intval', $wpdb->get_col( $query ) );
 
 		if ( empty( $post_ids ) ) {
@@ -865,15 +888,19 @@ final class SearchRepository {
 		global $wpdb;
 
 		$query = $wpdb->prepare(
-			"SELECT DISTINCT tr.object_id FROM {$wpdb->term_relationships} tr 
-			 INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id 
-			 INNER JOIN {$wpdb->terms} t ON tt.term_id = t.term_id 
-			 WHERE tt.taxonomy = %s AND t.name LIKE %s LIMIT 100",
+			'SELECT DISTINCT tr.object_id FROM %i tr 
+			 INNER JOIN %i tt ON tr.term_taxonomy_id = tt.term_taxonomy_id 
+			 INNER JOIN %i t ON tt.term_id = t.term_id 
+			 WHERE tt.taxonomy = %s AND t.name LIKE %s LIMIT %d',
+			$wpdb->term_relationships,
+			$wpdb->term_taxonomy,
+			$wpdb->terms,
 			$taxonomy,
-			'%' . $wpdb->esc_like( $term ) . '%'
+			'%' . $wpdb->esc_like( $term ) . '%',
+			100
 		);
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
 		return array_map( 'intval', $wpdb->get_col( $query ) );
 	}
 
@@ -901,15 +928,20 @@ final class SearchRepository {
 			return array();
 		}
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$query = $wpdb->prepare(
-			"SELECT DISTINCT tr.object_id FROM {$wpdb->term_relationships} tr 
-			 INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id 
-			 INNER JOIN {$wpdb->terms} t ON tt.term_id = t.term_id 
-			 WHERE tt.taxonomy IN ($placeholders) AND t.name LIKE %s LIMIT 100",
-			array_merge( $taxonomies, array( '%' . $wpdb->esc_like( $term ) . '%' ) )
+		$placeholders = implode( ',', array_fill( 0, count( $taxonomies ), '%s' ) );
+		$sql          = "SELECT DISTINCT tr.object_id FROM %i tr 
+			 INNER JOIN %i tt ON tr.term_taxonomy_id = tt.term_taxonomy_id 
+			 INNER JOIN %i t ON tt.term_id = t.term_id 
+			 WHERE tt.taxonomy IN ($placeholders) AND t.name LIKE %s LIMIT %d";
+
+		$params = array_merge(
+			array( $wpdb->term_relationships, $wpdb->term_taxonomy, $wpdb->terms ),
+			$taxonomies,
+			array( '%' . $wpdb->esc_like( $term ) . '%', 100 )
 		);
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
+		$query = $wpdb->prepare( $sql, ...$params );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
 		return array_map( 'intval', $wpdb->get_col( $query ) );
@@ -985,18 +1017,18 @@ final class SearchRepository {
 		// Prefix searches as v in where conditions
 		$where_data = $this->build_where_conditions( $filters );
 
-		$sql    = "SELECT c.post_id, COUNT(*) AS click_count, COUNT(DISTINCT c.search_id) AS unique_searches FROM {$table_clicks} AS c INNER JOIN {$table_searches} AS v ON c.search_id = v.id";
-		$params = array();
+		$sql    = 'SELECT c.post_id, COUNT(*) AS click_count, COUNT(DISTINCT c.search_id) AS unique_searches FROM %i AS c INNER JOIN %i AS v ON c.search_id = v.id';
+		$params = array( $table_clicks, $table_searches );
 
 		if ( ! empty( $where_data['conditions'] ) ) {
 			$sql   .= ' WHERE ' . implode( ' AND ', $where_data['conditions'] );
-			$params = $where_data['params'];
+			$params = array_merge( $params, $where_data['params'] );
 		}
 
 		$sql     .= ' GROUP BY c.post_id ORDER BY click_count DESC LIMIT %d';
 		$params[] = $limit;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
 		$results = $wpdb->get_results( $wpdb->prepare( $sql, ...$params ), ARRAY_A );
 
 		$products = array();
@@ -1034,20 +1066,20 @@ final class SearchRepository {
 		$where_data = $this->build_where_conditions( $filters );
 
 		// We select from Searches table, and do a left join with Clicks table
-		$sql = "SELECT v.search_term, COUNT(DISTINCT v.id) AS search_count, MIN(v.result_count) AS min_results, COUNT(DISTINCT c.id) AS raw_clicks, COUNT(DISTINCT c.search_id) AS clicked_searches
-				FROM {$table_searches} AS v
-				LEFT JOIN {$table_clicks} AS c ON c.search_id = v.id";
+		$sql = 'SELECT v.search_term, COUNT(DISTINCT v.id) AS search_count, MIN(v.result_count) AS min_results, COUNT(DISTINCT c.id) AS raw_clicks, COUNT(DISTINCT c.search_id) AS clicked_searches
+				FROM %i AS v
+				LEFT JOIN %i AS c ON c.search_id = v.id';
 
-		$params = array();
+		$params = array( $table_searches, $table_clicks );
 		if ( ! empty( $where_data['conditions'] ) ) {
 			$sql   .= ' WHERE ' . implode( ' AND ', $where_data['conditions'] );
-			$params = $where_data['params'];
+			$params = array_merge( $params, $where_data['params'] );
 		}
 
 		$sql     .= ' GROUP BY v.search_term ORDER BY search_count DESC, v.search_term ASC LIMIT %d';
 		$params[] = $limit;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
 		$results = $wpdb->get_results( $wpdb->prepare( $sql, ...$params ), ARRAY_A );
 
 		$performance = array();

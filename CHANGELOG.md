@@ -6,6 +6,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
+## [1.1.0] - 2026-08-27
+
+### Added
+* Search Form Design Customizer page in the admin menu.
+* Real-time live-preview sidebar with state controls and viewport simulators.
+* Automatic generation and output of customizable `--vplens-*` CSS variables.
+* Multi-layout settings supporting Inline, Stacked (Full-Width), and expandable Compact form designs.
+* Styling overrides for input placeholders, borders, padding, and sizes.
+* Styling overrides for button colors, icons, borders, and typography.
+* Styling overrides for suggestion dropdown shadows, radius, and margins.
+* Styling overrides for WooCommerce search suggestions, prices, categories, SKU, stock status, and badges.
+* Reverted to standard WordPress Dashicons in forms and widgets.
+
+### Changed
+- Adapted widgets and shortcodes to inherit styles from the Design Customizer's CSS properties.
+
+### Removed
+- Removed the old `form_style` settings parameter from widgets, blocks, and shortcodes.
+- Removed custom SVG markups from widgets and form structures.
+- Removed suggestion box focus overlay options from AJAX search script.
+
 ## [1.0.0] - 2026-07-29
 
 ### Added

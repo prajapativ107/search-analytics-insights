@@ -109,6 +109,22 @@
 					}
 				);
 			}
+			// Collapsible settings sections logic
+			wrapper.addEventListener(
+				'click',
+				function (e) {
+					const title = e.target.closest( '.vplens-customizer-section-title' );
+					if ( ! title) {
+						return;
+					}
+
+					e.preventDefault();
+					const section = title.closest( '.vplens-customizer-section' );
+					if (section) {
+						section.classList.toggle( 'active' );
+					}
+				}
+			);
 
 			if ( ! buttons.length) {
 				return;

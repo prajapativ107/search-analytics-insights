@@ -84,6 +84,16 @@ final class Menu {
 			array( $this->dashboard, 'render_settings_page' )
 		);
 
+		// Submenu: Search Form Design
+		add_submenu_page(
+			'vplens',
+			esc_html__( 'Search Form Design', 'search-analytics-insights' ),
+			esc_html__( 'Search Form Design', 'search-analytics-insights' ),
+			Constants::CAPABILITY,
+			'vplens-design',
+			array( $this->dashboard, 'render_design_page' )
+		);
+
 		// Submenu: Tools
 		add_submenu_page(
 			'vplens',

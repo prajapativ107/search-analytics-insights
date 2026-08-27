@@ -879,3 +879,60 @@
 		grid-template-columns: 1fr !important;
 	}
 }
+
+/* --- Collapsible Accordion Sections --- */
+.vplens-customizer-section {
+	border: 1px solid #e2e8f0;
+	border-radius: 6px;
+	margin-bottom: 12px;
+	overflow: hidden;
+	background: #ffffff;
+	transition: all 0.15s ease-in-out;
+}
+
+.vplens-customizer-section-title {
+	margin: 0;
+	padding: 14px 16px;
+	font-size: 14px;
+	font-weight: 600;
+	cursor: pointer;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	color: #334155;
+	background: #f8fafc;
+	user-select: none;
+}
+
+.vplens-customizer-section-title:hover {
+	background: #f1f5f9;
+	color: #0f172a;
+}
+
+.vplens-customizer-section-title .dashicons {
+	font-size: 18px;
+	width: 18px;
+	height: 18px;
+	color: #94a3b8;
+	transition: transform 0.2s ease;
+}
+
+.vplens-customizer-section.active .vplens-customizer-section-title {
+	border-bottom: 1px solid #e2e8f0;
+	background: #f1f5f9;
+	color: #0f172a;
+}
+
+.vplens-customizer-section.active .vplens-customizer-section-title .dashicons {
+	transform: rotate(180deg);
+}
+
+.vplens-customizer-section-content {
+	display: none;
+	padding: 16px;
+	background: #ffffff;
+}
+
+.vplens-customizer-section.active .vplens-customizer-section-content {
+	display: block;
+}

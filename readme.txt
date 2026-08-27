@@ -2,9 +2,9 @@
 Contributors: vivek34
 Tags: search, analytics, ajax search, search tracking, search insights
 Requires at least: 6.2
-Tested up to: 7.0
+Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.0.0
+Stable tag: 1.1.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -152,6 +152,20 @@ Yes. SearchLens works with most modern WordPress themes.
 
 == Changelog ==
 
+= 1.1.0 =
+
+* Added Search Form Design Customizer in the admin menu.
+* Added real-time design preview simulator with state and device controls.
+* Added dynamic CSS custom properties (variables) generation and injection.
+* Added layout options supporting Inline, stacked Full-Width, and compact expandable Search forms.
+* Added granular customization options for input background, text, placeholders, heights, and borders.
+* Added granular customization options for button sizes, colors, icons, and fonts.
+* Added granular customization options for suggestions dropdown shadow, borders, padding, and results spacing.
+* Added granular customization options for WooCommerce results, pricing, category label, SKU, and badges.
+* Replaced inline search SVG icons with standard WordPress Dashicons.
+* Removed the old layout template styles (rounded, rectangle, underlined).
+* Removed suggestions dropdown focus overlay backdrop.
+
 = 1.0.0 =
 
 * Initial public release.
@@ -177,6 +191,10 @@ Yes. SearchLens works with most modern WordPress themes.
 * WordPress Coding Standards compliant.
 
 == Upgrade Notice ==
+
+= 1.1.0 =
+
+This version adds a live-preview Search Form Design Customizer, dynamic CSS styling variable generation, layout presets, and code cleanups.
 
 = 1.0.0 =
 
