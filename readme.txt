@@ -1,7 +1,7 @@
 === SearchLens – Search Analytics & Insights ===
 Contributors: vivek34
 Tags: search, ajax search, woocommerce search, search Product, search insights
-Requires at least: 6.2
+Requires at least: 6.3
 Tested up to: 7.1
 Requires PHP: 8.0
 Stable tag: 1.1.0
