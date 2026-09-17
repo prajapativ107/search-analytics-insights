@@ -165,16 +165,22 @@ final class SearchController {
 			$search_words = preg_split( '/\s+/u', mb_strtolower( trim( $search_term ) ) );
 			$search_words = array_filter( $search_words );
 
+			// Require every search word to appear as a whole word (not a loose substring) in at
+			// least one field, so a short guessable word can't rubber-stamp an unrelated post.
+			$legitimate = ! empty( $search_words );
 			foreach ( $search_words as $word ) {
+				$pattern = '/\b' . preg_quote( $word, '/' ) . '\b/u';
 				if (
-					false !== mb_strpos( mb_strtolower( $title ), $word ) ||
-					false !== mb_strpos( mb_strtolower( $content ), $word ) ||
-					false !== mb_strpos( mb_strtolower( $excerpt ), $word ) ||
-					( ! empty( $sku ) && false !== mb_strpos( mb_strtolower( $sku ), $word ) )
+					preg_match( $pattern, mb_strtolower( $title ) ) ||
+					preg_match( $pattern, mb_strtolower( $content ) ) ||
+					preg_match( $pattern, mb_strtolower( $excerpt ) ) ||
+					( ! empty( $sku ) && preg_match( $pattern, mb_strtolower( $sku ) ) )
 				) {
-					$legitimate = true;
-					break;
+					continue;
 				}
+
+				$legitimate = false;
+				break;
 			}
 		}
 
