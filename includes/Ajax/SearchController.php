@@ -165,6 +165,8 @@ final class SearchController {
 			$search_words = preg_split( '/\s+/u', mb_strtolower( trim( $search_term ) ) );
 			$search_words = array_filter( $search_words );
 
+			// A click only counts if at least one word from the original search term shows up
+			// somewhere on the clicked post, so a click_id can't be forged for arbitrary content.
 			foreach ( $search_words as $word ) {
 				if (
 					false !== mb_strpos( mb_strtolower( $title ), $word ) ||
