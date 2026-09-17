@@ -1376,8 +1376,16 @@ final class Settings {
 		}
 
 		return array(
-			'show_loader'   => ! empty( $value['show_loader'] ),
-			'focus_overlay' => ! empty( $value['focus_overlay'] ),
+			'enabled'             => ! empty( $value['enabled'] ),
+			'search_fields'       => $search_fields,
+			'show_price'          => ! empty( $value['show_price'] ),
+			'show_stock'          => ! empty( $value['show_stock'] ),
+			'show_sku'            => ! empty( $value['show_sku'] ),
+			'show_sale_badge'     => ! empty( $value['show_sale_badge'] ),
+			'show_featured_badge' => ! empty( $value['show_featured_badge'] ),
+			'show_view_all'       => ! empty( $value['show_view_all'] ),
+			'show_loader'         => ! empty( $value['show_loader'] ),
+			'focus_overlay'       => ! empty( $value['focus_overlay'] ),
 		);
 	}
 
