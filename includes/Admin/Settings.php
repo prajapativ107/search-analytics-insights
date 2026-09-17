@@ -1361,6 +1361,9 @@ final class Settings {
 	private function sanitize_woocommerce_settings( $value ): array {
 		$value = is_array( $value ) ? $value : array();
 
+		// Whitelisted against the fields SearchRepository::modify_search_sql() knows how to
+		// query, so a stored setting can never reference a field that query-building doesn't
+		// handle.
 		$allowed_fields = array( 'title', 'sku', 'short_desc', 'desc', 'category', 'tag', 'attributes' );
 		$search_fields  = array();
 		if ( isset( $value['search_fields'] ) && is_array( $value['search_fields'] ) ) {

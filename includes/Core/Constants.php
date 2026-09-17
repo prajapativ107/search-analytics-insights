@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
  * Central plugin constants and shared keys.
  */
 final class Constants {
-	public const VERSION                      = '1.1.0';
+	public const VERSION                      = '1.1.1';
 	public const TEXT_DOMAIN                  = 'search-analytics-insights';
 	public const OPTION_SCHEMA_VERSION        = 'vplens_schema_version';
 	public const OPTION_PLUGIN_VERSION        = 'vplens_plugin_version';

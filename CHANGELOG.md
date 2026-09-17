@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
+## [1.1.1] - 2026-09-17
+
+### Fixed
+* Uninstalling the plugin now also removes the search-clicks database table (previously only the searches table was dropped, leaving click/user/session data behind).
+* AJAX click-tracking now requires every word of the original search term to match as a whole word (not a loose substring) on the clicked post, preventing fabricated clicks from inflating click-through analytics.
+* WooCommerce search settings (enabled state, search fields, and all display toggles) are no longer reset to their defaults every time the settings page is saved.
+* Several default UI strings (search placeholder, button text, "No results found.", "See all results") are now translatable instead of hardcoded in English.
+* Corrected a string concatenation that could break translated word order in the "Most Clicked Products" dashboard table.
+
+### Changed
+* Minimum required WordPress version raised from 6.2 to 6.3, since the bundled classic widget relies on a `WP_Widget` behavior Core only added in 6.3.
+
 ## [1.1.0] - 2026-08-27
 
 ### Added

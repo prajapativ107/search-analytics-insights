@@ -828,6 +828,9 @@ final class SearchRepository {
 			}
 		}
 
+		// Each word must match at least one enabled field (OR), but every word in a multi-word
+		// query must be satisfied (AND) — this replaces WordPress core's default title/content
+		// OR-search entirely rather than appending to it.
 		if ( ! empty( $term_clauses ) ) {
 			$search = ' AND (' . implode( ' AND ', $term_clauses ) . ')';
 		}
