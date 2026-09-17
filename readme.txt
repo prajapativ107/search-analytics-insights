@@ -4,7 +4,7 @@ Tags: search, ajax search, woocommerce search, search Product, search insights
 Requires at least: 6.3
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -152,6 +152,15 @@ Yes. SearchLens works with most modern WordPress themes.
 
 == Changelog ==
 
+= 1.1.1 =
+
+* Fixed: Uninstalling the plugin now also removes the search-clicks database table.
+* Fixed: AJAX click-tracking now requires whole-word matches on all search terms, preventing fabricated clicks from inflating analytics.
+* Fixed: WooCommerce search settings no longer reset to defaults on every settings save.
+* Fixed: Several default UI strings are now translatable instead of hardcoded in English.
+* Fixed: A string concatenation that could break translated word order in the dashboard.
+* Changed: Minimum required WordPress version raised from 6.2 to 6.3.
+
 = 1.1.0 =
 
 * Added Search Form Design Customizer in the admin menu.
@@ -191,6 +200,10 @@ Yes. SearchLens works with most modern WordPress themes.
 * WordPress Coding Standards compliant.
 
 == Upgrade Notice ==
+
+= 1.1.1 =
+
+Security and data-integrity fixes for click-tracking and uninstall cleanup, a WooCommerce settings persistence fix, translation improvements, and a minimum WordPress version bump to 6.3. Recommended for all users.
 
 = 1.1.0 =
 
