@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: SearchLens – Search Analytics & Insights
- * Plugin URI: https://wordpress.org/plugins/
+ * Plugin URI: https://wordpress.org/plugins/search-analytics-insights/
  * Description: Track WordPress site searches and provide analytics for administrators.
  * Version: 1.1.0
  * Requires at least: 6.3
