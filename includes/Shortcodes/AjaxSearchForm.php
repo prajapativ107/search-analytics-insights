@@ -157,7 +157,7 @@ final class AjaxSearchForm {
 			data-wc-show-sale="<?php echo esc_attr( ! empty( $wc_settings['show_sale_badge'] ) ? '1' : '0' ); ?>"
 			data-wc-show-featured="<?php echo esc_attr( ! empty( $wc_settings['show_featured_badge'] ) ? '1' : '0' ); ?>"
 			data-wc-show-view-all="<?php echo esc_attr( ! empty( $wc_settings['show_view_all'] ) ? '1' : '0' ); ?>"
-			data-wc-view-all-label="<?php echo esc_attr( $design['view_all']['text'] ?? 'See all results' ); ?>"
+			data-wc-view-all-label="<?php echo esc_attr( $design['view_all']['text'] ?? __( 'See all results', 'search-analytics-insights' ) ); ?>"
 			data-wc-show-loader="<?php echo esc_attr( ! empty( $wc_settings['show_loader'] ) ? '1' : '0' ); ?>"
 			data-wc-focus-overlay="<?php echo esc_attr( ! empty( $wc_settings['focus_overlay'] ) ? '1' : '0' ); ?>"
 		>

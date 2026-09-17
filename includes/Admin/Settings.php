@@ -23,9 +23,6 @@ final class Settings {
 	private const SECTION_SEARCH_SOURCES          = 'vplens_search_sources';
 	private const SECTION_ANALYTICS               = 'vplens_analytics';
 	private const SECTION_WOOCOMMERCE             = 'vplens_woocommerce';
-	private const DEFAULT_PLACEHOLDER             = 'Search posts and pages...';
-	private const DEFAULT_BUTTON_TEXT             = 'Search';
-	private const DEFAULT_NO_RESULTS_MESSAGE      = 'No results found.';
 	private const DEFAULT_MAX_RESULTS             = 10;
 	private const DEFAULT_MINIMUM_CHARACTERS      = 2;
 	private const DEFAULT_DEBOUNCE_TIME           = 300;
@@ -723,7 +720,7 @@ final class Settings {
 	public function get_no_results_message(): string {
 		$design = $this->get_design_settings();
 
-		return (string) ( $design['no_results']['message'] ?? self::DEFAULT_NO_RESULTS_MESSAGE );
+		return (string) ( $design['no_results']['message'] ?? __( 'No results found.', 'search-analytics-insights' ) );
 	}
 
 	/**
@@ -882,8 +879,8 @@ final class Settings {
 	private function get_default_settings(): array {
 		return array(
 			'search_form'    => array(
-				'placeholder' => self::DEFAULT_PLACEHOLDER,
-				'button_text' => self::DEFAULT_BUTTON_TEXT,
+				'placeholder' => __( 'Search posts and pages...', 'search-analytics-insights' ),
+				'button_text' => __( 'Search', 'search-analytics-insights' ),
 				'show_button' => true,
 			),
 			'ajax_search'    => array(
@@ -914,7 +911,7 @@ final class Settings {
 				'show_sale_badge'     => true,
 				'show_featured_badge' => true,
 				'show_view_all'       => true,
-				'view_all_label'      => 'See all results',
+				'view_all_label'      => __( 'See all results', 'search-analytics-insights' ),
 				'show_loader'         => true,
 				'focus_overlay'       => true,
 			),
@@ -933,8 +930,8 @@ final class Settings {
 		$value = is_array( $value ) ? $value : array();
 
 		return array(
-			'placeholder' => $this->sanitize_text_setting( $value['placeholder'] ?? self::DEFAULT_PLACEHOLDER ),
-			'button_text' => $this->sanitize_text_setting( $value['button_text'] ?? self::DEFAULT_BUTTON_TEXT ),
+			'placeholder' => $this->sanitize_text_setting( $value['placeholder'] ?? __( 'Search posts and pages...', 'search-analytics-insights' ) ),
+			'button_text' => $this->sanitize_text_setting( $value['button_text'] ?? __( 'Search', 'search-analytics-insights' ) ),
 			'show_button' => ! empty( $value['show_button'] ),
 		);
 	}
@@ -1185,7 +1182,7 @@ final class Settings {
 	private function sanitize_textarea_setting( $value ): string {
 		$value = sanitize_textarea_field( (string) $value );
 
-		return '' === $value ? self::DEFAULT_NO_RESULTS_MESSAGE : $value;
+		return '' === $value ? __( 'No results found.', 'search-analytics-insights' ) : $value;
 	}
 
 	/**
@@ -1461,12 +1458,12 @@ final class Settings {
 				'featured_text' => '#ffffff',
 			),
 			'no_results' => array(
-				'message'    => 'No results found.',
+				'message'    => __( 'No results found.', 'search-analytics-insights' ),
 				'text_color' => '#5f6b7a',
 				'font_size'  => 15,
 			),
 			'view_all'   => array(
-				'text'        => 'See all results',
+				'text'        => __( 'See all results', 'search-analytics-insights' ),
 				'text_color'  => '#0b7285',
 				'bg_color'    => '#f8fafc',
 				'hover_color' => '#0f9bb0',
