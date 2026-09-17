@@ -486,7 +486,15 @@ final class Dashboard {
 											<strong><?php echo esc_html( $row['title'] ); ?></strong>
 											<br />
 											<span class="description" style="font-size: 0.85em; color: #5f6b7a;">
-												<?php echo esc_html__( 'Product ID:', 'search-analytics-insights' ) . ' ' . absint( $row['post_id'] ); ?>
+												<?php
+												echo esc_html(
+													sprintf(
+														/* translators: %d: product ID */
+														__( 'Product ID: %d', 'search-analytics-insights' ),
+														absint( $row['post_id'] )
+													)
+												);
+												?>
 											</span>
 										</td>
 										<td><?php echo esc_html( (string) $row['click_count'] ); ?></td>
